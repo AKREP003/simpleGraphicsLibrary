@@ -4,17 +4,18 @@ mod objects;
 
 
 use std::collections::LinkedList;
-use objects::{Pixel, Rend};
+use objects::{Rend};
 
 use WINdisplay::{run_window, HEIGHT, WIDTH};
 
 use render::draw_gradient;
-
+use crate::objects::{Objects};
+use crate::objects::Objects::Point;
 
 
 pub struct State {
 
-    pub(crate) objects:Vec<Pixel>
+    pub(crate) objects:Vec<Objects>
 
 }
 
@@ -28,14 +29,12 @@ fn main() {
 
     unsafe {
         STATE = State {
-            objects: vec![Pixel {
-                r: 255,
-                g: 0,
-                b: 0,
-                a: 0,
-            }; (HEIGHT * WIDTH) as usize]
+            objects: vec![Point(
+                 (50, 50), (255, 0, 0, 0)
+            )]
         };
-    }
 
     run_window(draw_gradient);
+
+    }
 }
