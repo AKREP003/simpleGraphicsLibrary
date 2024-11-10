@@ -14,7 +14,7 @@ use winapi::shared::ntdef::LPCSTR;
 pub const WIDTH: i32 = 640;
 pub const HEIGHT: i32 = 480;
 
-
+use crate::STATE;
 
 type DrawCallback = fn(&mut Vec<u8>);
 
@@ -33,14 +33,9 @@ unsafe extern "system" fn window_proc(
         WM_PAINT => {
             let hdc: HDC = GetDC(hwnd);
 
-            // Initialize pixel buffer if it's not already done
-            if PIXEL_BUFFER.is_empty() {
-                PIXEL_BUFFER = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
-            }
-
             // Call the provided draw callback if it is set
             if let Some(callback) = DRAW_CALLBACK {
-                callback(&mut PIXEL_BUFFER);
+                callback(&mut STATE.canvas);
             }
 
             let rgbq:RGBQUAD = RGBQUAD {
@@ -79,7 +74,7 @@ unsafe extern "system" fn window_proc(
                 0,
                 0,
                 HEIGHT as u32,
-                PIXEL_BUFFER.as_ptr() as *const _,
+                STATE.canvas.as_ptr() as *const _,
                 &bmi,
                 winapi::um::wingdi::DIB_RGB_COLORS,
             );
@@ -130,7 +125,6 @@ pub fn run_window(draw_callback: DrawCallback) {
             h_instance,
             ptr::null_mut(),
         );
-
         // Run the message loop
         let mut msg: MSG = std::mem::zeroed();
         while winapi::um::winuser::GetMessageA(&mut msg, ptr::null_mut(), 0, 0) > 0 {
