@@ -124,6 +124,44 @@ impl Rend for Objects {
 
             Objects::Triangle(coordinate1, coordinate2, coordinate3, surface) => {
 
+                let lines =  vec![
+                    line_between_points(*coordinate1, *coordinate2),
+                    line_between_points(*coordinate2, *coordinate3),
+                    line_between_points(*coordinate3, *coordinate1)
+                ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
+
+                if lines.len() == 0 {
+                    panic!("Triangle doesn't have an area");
+                }
+
+                let coords = vec![*coordinate1, *coordinate2, *coordinate3];
+
+                let boundry = (
+                    coords.clone().into_iter().map(|x| x.0).min().unwrap(),
+                    coords.into_iter().map(|x| x.0).max().unwrap()
+                );
+
+                for x in boundry.0..boundry.1 {
+
+                    let mut crossing_points = lines.iter().map(|line| crossing_point(x, Some(*line))).collect::<Vec<Option<i32>>>();
+
+                    crossing_points.sort_by(|a, b| (a.unwrap()).cmp(&b.unwrap()));
+
+                    let y1 = crossing_points.get(0).unwrap().unwrap();
+                    let y2 = crossing_points.get(1).unwrap().unwrap();
+
+                    let colour = match surface {
+                        Flat(colour) => colour.clone()
+                    };
+
+                    for y in y1..y2 {
+                        let index = indexify(&(x, y));
+                        rendered[index] = colour.0;
+                        rendered[index + 1] = colour.1;
+                        rendered[index + 2] = colour.2;
+                        rendered[index + 3] = colour.3;
+                    }
+                }
 
 
             },
@@ -161,11 +199,8 @@ impl Rend for Objects {
                     )
                 );
 
-                println!("{:?}", triangles.0);
-                println!("{:?}", triangles.1);
-
                 triangles.0.rend(rendered, state);
-                //triangles.1.rend(rendered, state);
+                triangles.1.rend(rendered, state);
 
             }
         }
