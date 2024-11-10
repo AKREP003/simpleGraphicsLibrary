@@ -10,7 +10,8 @@ use WINdisplay::{run_window, HEIGHT, WIDTH};
 
 use render::draw_gradient;
 use crate::objects::{Objects, Visual};
-use crate::objects::Objects::{Line, Point};
+use crate::objects::Objects::{Line, Point, Quadrangle, Triangle};
+use crate::objects::Surface::Flat;
 
 
 //dont make it reset every goddamn time
@@ -38,11 +39,20 @@ fn main() {
 
 
     unsafe {
-        STATE.objects =  vec![Point(
+        STATE.objects =  vec![
+            Point(
                  (50, 50), (255, 0, 0, 0)
-            ), Line(
+            ),
+            Line(
                 (0, 0), (WIDTH, 450), (255, 0, 0, 0)
-            )];
+            ),
+            Triangle(
+                (0,0), (50, 0), (50, 50), Flat((255, 0, 0, 0))
+            ),
+
+            Quadrangle((100, 100), (200, 200), (100, 200), (200, 100), Flat((255, 0, 0, 0)))
+
+        ];
         STATE.canvas = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
 
     run_window(draw_gradient);
