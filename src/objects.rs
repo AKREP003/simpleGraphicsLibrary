@@ -22,6 +22,38 @@ pub enum Surface {
 
 }
 
+type InfLine = (i32, i32);
+
+fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
+
+    match light {
+        Some((slope, intercept)) => {
+            let y = slope * x + intercept;
+            Some(y as i32)
+        },
+        None => None
+    }
+
+    }
+
+
+
+fn line_between_points(p1: Coordinate, p2: Coordinate) -> Option<InfLine> {
+    let dx = p2.0 - p1.0;
+    let dy = p2.1 - p1.1;
+
+    if dx == 0 {
+        return None;
+    }
+
+    let slope = dy / dx;
+
+    let intercept = p1.1 - slope * p1.0;
+
+    Some((slope, intercept))
+}
+
+
 #[derive(Clone, Debug)]
 pub enum Objects {
 
@@ -91,44 +123,9 @@ impl Rend for Objects {
 
 
             Objects::Triangle(coordinate1, coordinate2, coordinate3, surface) => {
-                match surface {
-                    Surface::Flat(colour) => {
-                        let mut x1 = coordinate1.0;
-                        let mut y1 = coordinate1.1;
-                        let mut x2 = coordinate2.0;
-                        let mut y2 = coordinate2.1;
-                        let mut x3 = coordinate3.0;
-                        let mut y3 = coordinate3.1;
 
-                        let mut coordinates = vec![coordinate1, coordinate2, coordinate3];
-                        coordinates.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
-                        let mut y = coordinates[0].1;
-                        let mut y_max = coordinates[2].1;
 
-                        while y < y_max {
-                            let mut x = coordinates[0].0 + ((y - coordinates[0].1) as f32 * (coordinates[2].0 - coordinates[0].0) as f32 / (coordinates[2].1 - coordinates[0].1) as f32) as i32;
-                            let mut x_max = coordinates[1].0 + ((y - coordinates[1].1) as f32 * (coordinates[2].0 - coordinates[1].0) as f32 / (coordinates[2].1 - coordinates[1].1) as f32) as i32;
-
-                            if x > x_max {
-                                let temp = x;
-                                x = x_max;
-                                x_max = temp;
-                            }
-
-                            for x in x..x_max {
-                                let index: usize = indexify(&(x, y));
-
-                                rendered[index] = colour.0;
-                                rendered[index + 1] = colour.1;
-                                rendered[index + 2] = colour.2;
-                                rendered[index + 3] = colour.3;
-                            }
-
-                            y += 1;
-                        }
-                    }
-                }
             },
 
 
