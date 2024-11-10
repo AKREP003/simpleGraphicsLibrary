@@ -1,4 +1,7 @@
 use crate::{STATE, State, WIDTH, HEIGHT};
+use crate::objects::Objects::Triangle;
+use crate::objects::Surface::Flat;
+
 pub type Visual = Vec<u8>;
 
 pub trait Rend {
@@ -12,12 +15,14 @@ type Coordinate = (i32, i32);
 
 fn indexify(c:&Coordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
+#[derive(Clone, Debug)]
 pub enum Surface {
 
     Flat(Colour)
 
 }
 
+#[derive(Clone, Debug)]
 pub enum Objects {
 
     Point(Coordinate, Colour),
@@ -128,15 +133,43 @@ impl Rend for Objects {
 
 
             Objects::Quadrangle(coordinate1, coordinate2, coordinate3, coordinate4, surface) => {
-                match surface {
-                    Surface::Flat(colour) => {
 
-                        let sorted_by_x = vec![coordinate1, coordinate2, coordinate3, coordinate4].sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+                let mut sorted_by_x:Vec<Coordinate> = vec![*coordinate1, *coordinate2, *coordinate3, *coordinate4];
 
+                sorted_by_x.sort_by(|a, b| (a.0).cmp(&b.0));
 
+                let mut grouping = (
+                    vec![*sorted_by_x.get(0).unwrap(), *sorted_by_x.get(1).unwrap()],
+                    vec![*sorted_by_x.get(2).unwrap(), *sorted_by_x.get(3).unwrap()]
 
-                    }
-                }
+                );
+
+                grouping.0.sort_by(|a, b| (a.1).cmp(&b.1));
+                grouping.1.sort_by(|a, b| (a.1).cmp(&b.1));
+
+                let triangles = (
+                    Triangle(
+                        grouping.0.get(0).unwrap().clone(),
+                        grouping.0.get(1).unwrap().clone(),
+                        grouping.1.get(0).unwrap().clone(),
+                        (*surface).clone()
+
+                    ),
+                    Triangle(
+                        grouping.1.get(1).unwrap().clone(),
+                        grouping.0.get(1).unwrap().clone(),
+                        grouping.1.get(0).unwrap().clone(),
+                        (*surface).clone()
+
+                    )
+                );
+
+                println!("{:?}", triangles.0);
+                println!("{:?}", triangles.1);
+
+                triangles.0.rend(rendered, state);
+                //triangles.1.rend(rendered, state);
+
             }
         }
     }
