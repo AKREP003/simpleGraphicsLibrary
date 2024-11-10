@@ -22,13 +22,13 @@ pub enum Surface {
 
 }
 
-type InfLine = (i32, i32);
+type InfLine = (f32, i32);
 
 fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
 
     match light {
         Some((slope, intercept)) => {
-            let y = slope * x + intercept;
+            let y = slope * (x as f32) + (intercept as f32);
             Some(y as i32)
         },
         None => None
@@ -46,9 +46,9 @@ fn line_between_points(p1: Coordinate, p2: Coordinate) -> Option<InfLine> {
         return None;
     }
 
-    let slope = dy / dx;
+    let slope = dy as f32 / dx as f32;
 
-    let intercept = p1.1 - slope * p1.0;
+    let intercept = (p1.1 as f32 - (slope * p1.0 as f32)) as i32;
 
     Some((slope, intercept))
 }
@@ -130,6 +130,8 @@ impl Rend for Objects {
                     line_between_points(*coordinate3, *coordinate1)
                 ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
 
+                println!("{:?}", lines);
+
                 if lines.len() == 0 {
                     panic!("Triangle doesn't have an area");
                 }
@@ -145,7 +147,9 @@ impl Rend for Objects {
 
                     let mut crossing_points = lines.iter().map(|line| crossing_point(x, Some(*line))).collect::<Vec<Option<i32>>>();
 
-                    crossing_points.sort_by(|a, b| (a.unwrap()).cmp(&b.unwrap()));
+                    crossing_points.sort();
+
+                    println!("{:?}", crossing_points);
 
                     let y1 = crossing_points.get(0).unwrap().unwrap();
                     let y2 = crossing_points.get(1).unwrap().unwrap();
