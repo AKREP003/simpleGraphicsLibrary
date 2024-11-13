@@ -130,16 +130,18 @@ impl Rend for Objects {
 
                 coords.sort_by(|a, b| (a.0).cmp(&b.0));
 
-                if coords.get(0).unwrap().0 == coords.get(1).unwrap().0 {
+                let coordinates = (*coords.get(0).unwrap(), *coords.get(1).unwrap(), *coords.get(2).unwrap());
+
+                if coordinates.0.0 == coords.get(1).unwrap().0 {
 
                     let lines =  vec![
-                        line_between_points(*coords.get(0).unwrap(), *coords.get(2).unwrap()),
-                        line_between_points(*coords.get(1).unwrap(), *coords.get(2).unwrap())
+                        line_between_points(coordinates.0, coordinates.2),
+                        line_between_points(coordinates.1, coordinates.2)
                     ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
 
 
 
-                    for x in 0 .. coords.get(2).unwrap().0 - coords.get(0).unwrap().0 {
+                    for x in 0 .. coordinates.2.0 - coordinates.0.0 {
 
                         let y1 = crossing_point(x, lines.get(0).copied()).unwrap();
                         let y2 = crossing_point(x, lines.get(1).copied()).unwrap();
@@ -147,7 +149,7 @@ impl Rend for Objects {
 
 
                         for y in min(y1, y2) .. max(y1, y2) {
-                            let index:usize = indexify(&(x + coords.get(0).unwrap().0, y));
+                            let index:usize = indexify(&(x + coordinates.0.0, y));
 
                             match surface {
 
@@ -163,19 +165,19 @@ impl Rend for Objects {
 
                     }
 
-                } else if coords.get(1).unwrap().0 == coords.get(2).unwrap().0 {
+                } else if coordinates.1.0 == coordinates.2.0 {
 
                     let lines =  vec![
-                        line_between_points(*coords.get(0).unwrap(), *coords.get(1).unwrap()),
-                        line_between_points(*coords.get(0).unwrap(), *coords.get(2).unwrap())
+                        line_between_points(coordinates.0, coordinates.1),
+                        line_between_points(coordinates.0, coordinates.2)
                     ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
 
-                    for x in 0 .. coords.get(1).unwrap().0 - coords.get(0).unwrap().0 {
+                    for x in 0 .. coordinates.1.0 - coordinates.0.0 {
                         let y1 = crossing_point(x, lines.get(0).copied()).unwrap();
                         let y2 = crossing_point(x, lines.get(1).copied()).unwrap();
 
                         for y in min(y1, y2)..max(y1, y2) {
-                            let index: usize = indexify(&(x + coords.get(0).unwrap().0, y));
+                            let index: usize = indexify(&(x + coordinates.0.0, y));
 
                             match surface {
                                 Flat(colour) => {
@@ -190,20 +192,20 @@ impl Rend for Objects {
 
                 } else {
 
-                    let line =  line_between_points(*coords.get(0).unwrap(), *coords.get(2).unwrap()).unwrap();
+                    let line =  line_between_points(coordinates.0, coordinates.2).unwrap();
 
-                    let next0 = (coords.get(1).unwrap().0, crossing_point(coords.get(1).unwrap().0 - coords.get(0).unwrap().0, Some(line)).unwrap());
+                    let next0 = (coordinates.1.0, crossing_point(coordinates.1.0 - coordinates.0.0, Some(line)).unwrap());
 
                     let triangles = (
                         Triangle(
-                            *coords.get(0).unwrap(),
-                            *coords.get(1).unwrap(),
+                            coordinates.0,
+                            coordinates.1,
                             next0,
                             (*surface).clone()
                         ),
                         Triangle(
-                            *coords.get(2).unwrap(),
-                            *coords.get(1).unwrap(),
+                            coordinates.2,
+                            coordinates.1,
                             next0,
                             (*surface).clone()
                         )
@@ -251,7 +253,7 @@ impl Rend for Objects {
                 );
 
                 triangles.0.rend(rendered, state);
-                println!("{:?}", triangles.1);
+
                 triangles.1.rend(rendered, state);
 
             }

@@ -7,7 +7,7 @@ use std::time::Duration;
 
 pub(crate) fn draw_gradient(pixels: &mut Vec<u8>) {
 
-    thread::sleep(Duration::from_millis(7)); //144 fps
+    thread::sleep(Duration::from_millis(20)); //144 fps
 
     unsafe {
 
