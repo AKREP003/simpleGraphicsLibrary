@@ -137,14 +137,14 @@ impl Rend for Objects {
                         line_between_points(*coords.get(1).unwrap(), *coords.get(2).unwrap())
                     ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
 
-                    println!("{:?}", lines);
+
 
                     for x in 0 .. coords.get(2).unwrap().0 - coords.get(0).unwrap().0 {
 
                         let y1 = crossing_point(x, lines.get(0).copied()).unwrap();
                         let y2 = crossing_point(x, lines.get(1).copied()).unwrap();
 
-                        println!("{} {} {}", x, y1, y2);
+
 
                         for y in min(y1, y2) .. max(y1, y2) {
                             let index:usize = indexify(&(x + coords.get(0).unwrap().0, y));
@@ -192,7 +192,7 @@ impl Rend for Objects {
 
                     let line =  line_between_points(*coords.get(0).unwrap(), *coords.get(2).unwrap()).unwrap();
 
-                    let next0 = (coords.get(1).unwrap().0, crossing_point(coords.get(1).unwrap().0, Some(line)).unwrap());
+                    let next0 = (coords.get(1).unwrap().0, crossing_point(coords.get(1).unwrap().0 - coords.get(0).unwrap().0, Some(line)).unwrap());
 
                     let triangles = (
                         Triangle(
@@ -251,6 +251,7 @@ impl Rend for Objects {
                 );
 
                 triangles.0.rend(rendered, state);
+                println!("{:?}", triangles.1);
                 triangles.1.rend(rendered, state);
 
             }
