@@ -12,7 +12,7 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>) {
     unsafe {
 
         if STATE.objects.len() == 0 {
-            thread::yield_now();
+            //thread::yield_now();
             return
         }
 

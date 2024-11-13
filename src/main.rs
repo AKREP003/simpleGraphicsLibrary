@@ -1,3 +1,4 @@
+#![feature(core_intrinsics)]
 mod WINdisplay;
 mod render;
 mod objects;
@@ -47,7 +48,7 @@ fn main() {
                 (0, 0), (WIDTH, 450), (255, 0, 0, 0)
             ),
             Triangle(
-                (200, 50), (100, 200), (200, 200), Flat((255, 0, 0, 0))
+                (20, 200), (200, 180), (100, 0), Flat((255, 0, 0, 0))
             ),
 
             //Quadrangle((100, 100), (200, 200), (100, 200), (200, 100), Flat((255, 0, 0, 0)))
