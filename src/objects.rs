@@ -1,5 +1,5 @@
 use std::cmp::{max, min};
-use std::intrinsics::{floorf32, roundf32};
+use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
 use crate::{STATE, State, WIDTH, HEIGHT};
 use crate::objects::Objects::Triangle;
@@ -32,7 +32,7 @@ fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
     match light {
         Some((slope, intercept)) => unsafe {
             let y = slope * (x as f32) + (intercept as f32);
-            Some(roundf32(y) as i32)
+            Some(floorf32(y) as i32)
         },
         None => None
     }
