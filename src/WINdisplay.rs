@@ -14,9 +14,11 @@ use winapi::shared::ntdef::LPCSTR;
 pub const WIDTH: i32 = 640;
 pub const HEIGHT: i32 = 480;
 
-use crate::STATE;
+use crate::EVENTLOOP;
+use crate::objects::Objects;
+use crate::render::GraphicProcess;
 
-type DrawCallback = fn(&mut Vec<u8>);
+type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Objects>);
 
 static mut DRAW_CALLBACK: Option<DrawCallback> = None;
 
@@ -33,9 +35,19 @@ unsafe extern "system" fn window_proc(
         WM_PAINT => {
             let hdc: HDC = GetDC(hwnd);
 
-            // Call the provided draw callback if it is set
             if let Some(callback) = DRAW_CALLBACK {
-                callback(&mut STATE.canvas);
+
+                if let Some(s) = EVENTLOOP.spec() {
+
+                    if let Some(v) = s.canvas {
+                        PIXEL_BUFFER = v;
+                    }
+
+                    callback(&mut PIXEL_BUFFER, s.objects);
+
+
+                }
+
             }
 
             let rgbq:RGBQUAD = RGBQUAD {
@@ -74,7 +86,7 @@ unsafe extern "system" fn window_proc(
                 0,
                 0,
                 HEIGHT as u32,
-                STATE.canvas.as_ptr() as *const _,
+                PIXEL_BUFFER.as_ptr() as *const _,
                 &bmi,
                 winapi::um::wingdi::DIB_RGB_COLORS,
             );
@@ -91,7 +103,11 @@ unsafe extern "system" fn window_proc(
 
 // Wrapper function to set up and run the window loop
 pub fn run_window(draw_callback: DrawCallback) {
+
+
     unsafe {
+        //PIXEL_BUFFER =  vec![0u8; (WIDTH * HEIGHT * 4) as usize];
+
         let h_instance = GetModuleHandleA(ptr::null());
         let class_name = CString::new("window").unwrap();
 

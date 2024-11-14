@@ -10,7 +10,7 @@ use crate::render::State;
 pub type Visual = Vec<u8>;
 
 pub trait Rend {
-    fn rend(&self, rendered: &mut Visual, state: &State);
+    fn rend(&self, rendered: &mut Visual);
 }
 
 
@@ -74,7 +74,7 @@ pub enum Objects {
 }
 
 impl Rend for Objects {
-    fn rend(&self, rendered: &mut Visual, state: &State) {
+    fn rend(&self, rendered: &mut Visual) {
         match self {
             Objects::Point(coordinate, colour) => {
 
@@ -216,8 +216,8 @@ impl Rend for Objects {
                     );
 
 
-                    triangles.0.rend(rendered, state);
-                    triangles.1.rend(rendered, state); // watch out opengl
+                    triangles.0.rend(rendered);
+                    triangles.1.rend(rendered); // watch out opengl
 
                 }
 
@@ -256,9 +256,9 @@ impl Rend for Objects {
                     )
                 );
 
-                triangles.0.rend(rendered, state);
+                triangles.0.rend(rendered);
 
-                triangles.1.rend(rendered, state);
+                triangles.1.rend(rendered);
 
             }
 
@@ -280,7 +280,7 @@ impl Rend for Objects {
                         coordinates.get(i + 1).unwrap().clone(),
                         center.clone(),
                         surface.clone()
-                    ).rend(rendered, state);
+                    ).rend(rendered);
 
                 }
 
@@ -288,7 +288,7 @@ impl Rend for Objects {
                          coordinates.get(coordinates.len() - 1).unwrap().clone(),
                          center.clone(),
                          surface.clone()
-                ).rend(rendered, state);
+                ).rend(rendered);
 
             }
         }

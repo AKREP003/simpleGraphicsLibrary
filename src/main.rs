@@ -6,34 +6,61 @@ use std::collections::LinkedList;
 use std::f32::consts::PI;
 use objects::Rend;
 use WINdisplay::{HEIGHT, run_window, WIDTH};
-use render::{draw_gradient, State};
+use render::{draw_gradient, State, GraphicProcess};
 use crate::objects::{Objects, Visual};
 use crate::objects::Objects::{Line, Point, Polygon, Quadrangle, Triangle};
 use crate::objects::Surface::Flat;
 
 static mut STATE:State = State {
     objects:vec![],
-    canvas:vec![]
+    canvas:Some(vec![])
 };
+
+
+static mut EVENTLOOP: SimpleOctagon= SimpleOctagon{init:false};
+
+#[derive(Clone)]
+struct SimpleOctagon {init:bool}
+
+impl GraphicProcess for SimpleOctagon{
+
+    fn spec(&mut self) -> Option<State> {
+
+        if self.init {
+            return None;
+        }
+
+        self.init  = true;
+
+        Some(State {
+            objects:vec![
+                Polygon(4, 100, (200, 200), Flat((100, 200, 0, 0)))
+
+            ],
+            canvas:Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize])
+        })
+
+
+
+    }
+
+    
+}
+
+fn write_to_event_loop(loopy: SimpleOctagon) {
+    unsafe {
+        EVENTLOOP = loopy;
+    }
+}
 
 fn main() {
 
 
     unsafe {
-        STATE.objects =  vec![
 
 
-            //Triangle((131, 200), (131, 200), (130, 200), Flat((255, 0, 0, 0))),
 
-            //Quadrangle((100, 50), (200, 250), (130, 200), (250, 100), Flat((100, 200, 0, 0))),
-
-            Polygon(25, 100, (200, 200), Flat((100, 200, 0, 0)))
-
-        ];
-        STATE.canvas = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
-
-
-    run_window(draw_gradient);
+        run_window(draw_gradient);
 
     }
 }

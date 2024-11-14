@@ -1,30 +1,27 @@
 
-use crate::{HEIGHT, STATE, WIDTH};
+use crate::{HEIGHT, EVENTLOOP, WIDTH};
 use crate::objects::{Objects, Rend, Visual};
 use std::thread;
 use std::time::Duration;
 
 
-pub(crate) fn draw_gradient(pixels: &mut Vec<u8>) {
+pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Objects>) {
 
     thread::sleep(Duration::from_millis(20)); //144 fps
 
     unsafe {
 
-        if STATE.objects.len() == 0 {
+        if objects.len() == 0 {
             //thread::yield_now();
             return
         }
 
-        for object in STATE.objects.iter() {
+        for object in objects.iter() {
 
+            object.rend(pixels);
 
-
-            object.rend(pixels, &STATE)
 
         }
-
-        STATE.objects=vec![];
 
 
 
@@ -36,17 +33,17 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>) {
 
 //dont make it reset every goddamn time
 //object stack
-trait GraphicProcess {
+pub trait GraphicProcess {
 
-    fn init() -> State;
-    fn next(state:State) -> State;
+    fn spec(&mut self) -> Option<State>;
 }
 
 pub struct State {
 
     pub(crate) objects:Vec<Objects>,
 
-    pub canvas:Visual,
+    pub canvas:Option<Visual>,
+
 
 }
 
