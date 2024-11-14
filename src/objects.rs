@@ -1,9 +1,11 @@
 use std::cmp::{max, min};
+use std::f32::consts::PI;
 use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
-use crate::{STATE, State, WIDTH, HEIGHT};
+use crate::{HEIGHT, STATE, WIDTH};
 use crate::objects::Objects::Triangle;
 use crate::objects::Surface::Flat;
+use crate::render::State;
 
 pub type Visual = Vec<u8>;
 
@@ -65,7 +67,9 @@ pub enum Objects {
 
     Triangle(Coordinate, Coordinate, Coordinate, Surface),
 
-    Quadrangle(Coordinate, Coordinate, Coordinate, Coordinate, Surface)
+    Quadrangle(Coordinate, Coordinate, Coordinate, Coordinate, Surface),
+
+    Polygon(u32, u32, Coordinate, Surface),
 
 }
 
@@ -255,6 +259,36 @@ impl Rend for Objects {
                 triangles.0.rend(rendered, state);
 
                 triangles.1.rend(rendered, state);
+
+            }
+
+            Objects::Polygon(n, radius, center, surface) => {
+
+                let mut coordinates: Vec<Coordinate> = vec![];
+
+                for i in 0 .. *n {
+
+                    coordinates.push((
+                        center.0 + (*radius as f32 * (i as f32 * (2.0 * PI / *n as f32)).cos()) as i32,
+                        center.1 + (*radius as f32 * (i as f32 * (2.0 * PI / *n as f32)).sin()) as i32
+                    ));
+                }
+
+                for i in 0 .. coordinates.len() - 1 {
+                    Triangle(
+                        coordinates.get(i).unwrap().clone(),
+                        coordinates.get(i + 1).unwrap().clone(),
+                        center.clone(),
+                        surface.clone()
+                    ).rend(rendered, state);
+
+                }
+
+                Triangle(coordinates.get(0).unwrap().clone(),
+                         coordinates.get(coordinates.len() - 1).unwrap().clone(),
+                         center.clone(),
+                         surface.clone()
+                ).rend(rendered, state);
 
             }
         }

@@ -1,6 +1,6 @@
 
-use crate::{State, WIDTH, HEIGHT, STATE};
-use crate::objects::Rend;
+use crate::{HEIGHT, STATE, WIDTH};
+use crate::objects::{Objects, Rend, Visual};
 use std::thread;
 use std::time::Duration;
 
@@ -30,6 +30,23 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>) {
 
     }
 
+
+}
+
+
+//dont make it reset every goddamn time
+//object stack
+trait GraphicProcess {
+
+    fn init() -> State;
+    fn next(state:State) -> State;
+}
+
+pub struct State {
+
+    pub(crate) objects:Vec<Objects>,
+
+    pub canvas:Visual,
 
 }
 
