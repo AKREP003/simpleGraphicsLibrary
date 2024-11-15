@@ -2,7 +2,7 @@ use std::cmp::{max, min};
 use std::f32::consts::PI;
 use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
-use crate::{HEIGHT, STATE, WIDTH};
+use crate::{HEIGHT, WIDTH};
 use crate::objects::Objects::Triangle;
 use crate::objects::Surface::Flat;
 use crate::render::State;

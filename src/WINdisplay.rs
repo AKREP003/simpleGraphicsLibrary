@@ -1,5 +1,6 @@
-use std::ptr;
+use std::{ptr, thread};
 use std::ffi::CString;
+use std::time::Duration;
 use winapi::um::wingdi::{BITMAPINFO, BITMAPINFOHEADER, BI_RGB, SetDIBitsToDevice, RGBQUAD};
 use winapi::um::winuser::{
     CreateWindowExA, DefWindowProcA, DispatchMessageA, GetDC, LoadCursorW, RegisterClassA,
@@ -14,14 +15,16 @@ use winapi::shared::ntdef::LPCSTR;
 pub const WIDTH: i32 = 640;
 pub const HEIGHT: i32 = 480;
 
-use crate::EVENTLOOP;
 use crate::objects::Objects;
-use crate::render::GraphicProcess;
+use crate::render::{State};
 
 type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Objects>);
 
+type EventLoop = fn() -> Option<State>;
+
 static mut DRAW_CALLBACK: Option<DrawCallback> = None;
 
+static mut EVENTLOOP: Option<EventLoop> = None;
 
 static mut PIXEL_BUFFER: Vec<u8> = vec![];
 
@@ -31,19 +34,21 @@ unsafe extern "system" fn window_proc(
     w_param: WPARAM,
     l_param: LPARAM,
 ) -> LRESULT {
+    thread::sleep(Duration::from_millis(7)); //144 fps
+
     match msg {
         WM_PAINT => {
             let hdc: HDC = GetDC(hwnd);
 
             if let Some(callback) = DRAW_CALLBACK {
 
-                if let Some(s) = EVENTLOOP.spec() {
+                if let Some(s) = EVENTLOOP && let Some(state) = s(){
 
-                    if let Some(v) = s.canvas {
+                    if let Some(v) = state.canvas {
                         PIXEL_BUFFER = v;
                     }
 
-                    callback(&mut PIXEL_BUFFER, s.objects);
+                    callback(&mut PIXEL_BUFFER, state.objects);
 
 
                 }
@@ -102,11 +107,11 @@ unsafe extern "system" fn window_proc(
 }
 
 // Wrapper function to set up and run the window loop
-pub fn run_window(draw_callback: DrawCallback) {
-
+pub fn run_window(draw_callback: DrawCallback, event_loop:EventLoop) {
 
     unsafe {
-        //PIXEL_BUFFER =  vec![0u8; (WIDTH * HEIGHT * 4) as usize];
+
+        PIXEL_BUFFER =  vec![0u8; (WIDTH * HEIGHT * 4) as usize];
 
         let h_instance = GetModuleHandleA(ptr::null());
         let class_name = CString::new("window").unwrap();
@@ -122,6 +127,8 @@ pub fn run_window(draw_callback: DrawCallback) {
         };
 
         RegisterClassA(&wnd_class);
+
+        EVENTLOOP = Some(event_loop);
 
         // Set the draw callback in the static variable
         DRAW_CALLBACK = Some(draw_callback);
