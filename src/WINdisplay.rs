@@ -15,10 +15,10 @@ use winapi::shared::ntdef::LPCSTR;
 pub const WIDTH: i32 = 640;
 pub const HEIGHT: i32 = 480;
 
-use crate::objects::Objects;
+use crate::objects::ComplexObjects;
 use crate::render::{State};
 
-type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Objects>);
+type DrawCallback = fn(&mut Vec<u8>, objects: Vec<ComplexObjects>);
 
 type EventLoop = fn() -> Option<State>;
 

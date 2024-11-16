@@ -3,16 +3,21 @@ use std::f32::consts::PI;
 use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
 use crate::{HEIGHT, WIDTH};
-use crate::objects::Objects::Triangle;
+use crate::objects::ComplexObjects::ComplexTriangle;
+use crate::objects::GraphicObjects::Triangle;
 use crate::objects::Surface::Flat;
 use crate::render::State;
 
 pub type Visual = Vec<u8>;
 
+
 pub trait Rend {
     fn rend(&self, rendered: &mut Visual);
 }
 
+pub trait Compile {
+    fn compile(&self) -> Vec<GraphicObjects>;
+}
 
 type Colour = (u8, u8, u8, u8);
 type Coordinate = (i32, i32);
@@ -20,63 +25,23 @@ type Coordinate = (i32, i32);
 
 fn indexify(c:&Coordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
-#[derive(Clone, Debug)]
-pub enum Surface {
+pub enum GraphicObjects {
 
-    Flat(Colour)
-
-}
-
-type InfLine = (f32, i32);
-
-fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
-
-    match light {
-        Some((slope, intercept)) => unsafe {
-            let y = slope * (x as f32) + (intercept as f32);
-            Some(floorf32(y) as i32)
-        },
-        None => None
-    }
-
-    }
-
-
-fn line_between_points(p1: Coordinate, p2: Coordinate) -> Option<InfLine> {
-    let dx = p2.0 - p1.0;
-    let dy = p2.1 - p1.1;
-
-    if dx == 0 {
-        return None;
-    }
-
-    let slope = dy as f32 / dx as f32;
-
-    let intercept = p1.1;  //(p1.1 as f32 - (slope * p1.0 as f32)) as i32;
-
-    Some((slope, intercept))
-}
-
-
-#[derive(Clone, Debug)]
-pub enum Objects {
-
-    Point(Coordinate, Colour),
+    Pixel(Coordinate, Colour),
 
     Line(Coordinate, Coordinate, Colour),
 
     Triangle(Coordinate, Coordinate, Coordinate, Surface),
 
-    Quadrangle(Coordinate, Coordinate, Coordinate, Coordinate, Surface),
-
-    Polygon(u32, u32, Coordinate, Surface),
 
 }
+impl Rend for GraphicObjects {
 
-impl Rend for Objects {
     fn rend(&self, rendered: &mut Visual) {
+
         match self {
-            Objects::Point(coordinate, colour) => {
+
+            GraphicObjects::Pixel(coordinate, colour) => {
 
                 let index:usize = indexify(coordinate);
 
@@ -87,7 +52,7 @@ impl Rend for Objects {
 
             },
 
-            Objects::Line(coordinate1, coordinate2, colour) => {
+            GraphicObjects::Line(coordinate1, coordinate2, colour) => {
                 let mut x1 = coordinate1.0;
                 let mut y1 = coordinate1.1;
                 let mut x2 = coordinate2.0;
@@ -128,8 +93,7 @@ impl Rend for Objects {
             },
 
 
-            Objects::Triangle(coordinate1, coordinate2, coordinate3, surface) => {
-
+            GraphicObjects::Triangle(coordinate1, coordinate2, coordinate3, surface) => {
                 let mut coords = vec![*coordinate1, *coordinate2, *coordinate3];
 
                 coords.sort_by(|a, b| (a.0).cmp(&b.0));
@@ -137,26 +101,21 @@ impl Rend for Objects {
                 let coordinates = (*coords.get(0).unwrap(), *coords.get(1).unwrap(), *coords.get(2).unwrap());
 
                 if coordinates.0.0 == coords.get(1).unwrap().0 {
-
-                    let lines =  vec![
+                    let lines = vec![
                         line_between_points(coordinates.0, coordinates.2),
                         line_between_points(coordinates.1, coordinates.2)
                     ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
 
 
-
-                    for x in 0 .. coordinates.2.0 - coordinates.0.0 {
-
+                    for x in 0..coordinates.2.0 - coordinates.0.0 {
                         let y1 = crossing_point(x, lines.get(0).copied()).unwrap();
                         let y2 = crossing_point(x, lines.get(1).copied()).unwrap();
 
 
-
-                        for y in min(y1, y2) .. max(y1, y2) {
-                            let index:usize = indexify(&(x + coordinates.0.0, y));
+                        for y in min(y1, y2)..max(y1, y2) {
+                            let index: usize = indexify(&(x + coordinates.0.0, y));
 
                             match surface {
-
                                 Flat(colour) => {
                                     rendered[index] = colour.0;
                                     rendered[index + 1] = colour.1;
@@ -165,18 +124,14 @@ impl Rend for Objects {
                                 }
                             }
                         }
-
-
                     }
-
                 } else if coordinates.1.0 == coordinates.2.0 {
-
-                    let lines =  vec![
+                    let lines = vec![
                         line_between_points(coordinates.0, coordinates.1),
                         line_between_points(coordinates.0, coordinates.2)
                     ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
 
-                    for x in 0 .. coordinates.1.0 - coordinates.0.0 {
+                    for x in 0..coordinates.1.0 - coordinates.0.0 {
                         let y1 = crossing_point(x, lines.get(0).copied()).unwrap();
                         let y2 = crossing_point(x, lines.get(1).copied()).unwrap();
 
@@ -193,6 +148,84 @@ impl Rend for Objects {
                             }
                         }
                     }
+                } else {
+
+                    panic!("use the complex triangle, dont fuck with graphic triangles")
+
+                }
+            }
+        }
+
+    }
+
+}
+
+
+#[derive(Clone, Debug)]
+pub enum Surface {
+
+    Flat(Colour)
+
+}
+
+type InfLine = (f32, i32);
+
+fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
+
+    match light {
+        Some((slope, intercept)) => unsafe {
+            let y = slope * (x as f32) + (intercept as f32);
+            Some(floorf32(y) as i32)
+        },
+        None => None
+    }
+
+    }
+
+
+fn line_between_points(p1: Coordinate, p2: Coordinate) -> Option<InfLine> {
+    let dx = p2.0 - p1.0;
+    let dy = p2.1 - p1.1;
+
+    if dx == 0 {
+        return None;
+    }
+
+    let slope = dy as f32 / dx as f32;
+
+    let intercept = p1.1;  //(p1.1 as f32 - (slope * p1.0 as f32)) as i32;
+
+    Some((slope, intercept))
+}
+
+
+#[derive(Clone, Debug)]
+pub enum ComplexObjects {
+
+    ComplexTriangle(Coordinate, Coordinate, Coordinate, Surface),
+
+    Quadrangle(Coordinate, Coordinate, Coordinate, Coordinate, Surface),
+
+    Polygon(u32, u32, Coordinate, Surface),
+
+}
+
+impl Compile for ComplexObjects {
+    fn compile(&self) -> Vec<GraphicObjects> {
+        match self {
+
+            ComplexObjects::ComplexTriangle(coordinate1, coordinate2, coordinate3, surface) => {
+
+                let mut coords = vec![*coordinate1, *coordinate2, *coordinate3];
+
+                coords.sort_by(|a, b| (a.0).cmp(&b.0));
+
+                let coordinates = (*coords.get(0).unwrap(), *coords.get(1).unwrap(), *coords.get(2).unwrap());
+
+                if coordinates.0.0 == coords.get(1).unwrap().0 || coordinates.1.0 == coordinates.2.0{
+
+                    return vec![Triangle(coordinate1.clone(), coordinate2.clone(), coordinate3.clone(), surface.clone())];
+
 
                 } else {
 
@@ -200,7 +233,7 @@ impl Rend for Objects {
 
                     let next0 = (coordinates.1.0, crossing_point(coordinates.1.0 - coordinates.0.0, Some(line)).unwrap());
 
-                    let triangles = (
+                    return vec![
                         Triangle(
                             coordinates.0,
                             coordinates.1,
@@ -213,18 +246,15 @@ impl Rend for Objects {
                             next0,
                             (*surface).clone()
                         )
-                    );
+                    ];
 
-
-                    triangles.0.rend(rendered);
-                    triangles.1.rend(rendered); // watch out opengl
 
                 }
 
             },
 
 
-            Objects::Quadrangle(coordinate1, coordinate2, coordinate3, coordinate4, surface) => {
+            ComplexObjects::Quadrangle(coordinate1, coordinate2, coordinate3, coordinate4, surface) => {
 
                 let mut sorted_by_x:Vec<Coordinate> = vec![*coordinate1, *coordinate2, *coordinate3, *coordinate4];
 
@@ -239,7 +269,7 @@ impl Rend for Objects {
                 grouping.0.sort_by(|a, b| (a.1).cmp(&b.1));
                 grouping.1.sort_by(|a, b| (a.1).cmp(&b.1));
 
-                let triangles = (
+                return vec![
                     Triangle(
                         grouping.0.get(0).unwrap().clone(),
                         grouping.0.get(1).unwrap().clone(),
@@ -254,15 +284,13 @@ impl Rend for Objects {
                         (*surface).clone()
 
                     )
-                );
+                ];
 
-                triangles.0.rend(rendered);
 
-                triangles.1.rend(rendered);
 
             }
 
-            Objects::Polygon(n, radius, center, surface) => {
+            ComplexObjects::Polygon(n, radius, center, surface) => {
 
                 let mut coordinates: Vec<Coordinate> = vec![];
 
@@ -274,21 +302,24 @@ impl Rend for Objects {
                     ));
                 }
 
+                let mut triangles:Vec<GraphicObjects> = vec![
+                    Triangle(coordinates.get(0).unwrap().clone(),
+                                    coordinates.get(coordinates.len() - 1).unwrap().clone(),
+                                    center.clone(),
+                                    surface.clone())
+                ];
+
                 for i in 0 .. coordinates.len() - 1 {
-                    Triangle(
+                    triangles.push(Triangle(
                         coordinates.get(i).unwrap().clone(),
                         coordinates.get(i + 1).unwrap().clone(),
                         center.clone(),
                         surface.clone()
-                    ).rend(rendered);
+                    ))
 
                 }
 
-                Triangle(coordinates.get(0).unwrap().clone(),
-                         coordinates.get(coordinates.len() - 1).unwrap().clone(),
-                         center.clone(),
-                         surface.clone()
-                ).rend(rendered);
+                return triangles;
 
             }
         }

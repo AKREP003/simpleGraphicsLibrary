@@ -4,13 +4,15 @@
 mod WINdisplay;
 mod render;
 mod objects;
+mod triD;
+
 use std::collections::LinkedList;
 use std::f32::consts::PI;
 use objects::Rend;
 use WINdisplay::{HEIGHT, run_window, WIDTH};
 use render::{draw_gradient, State};
-use crate::objects::{Objects, Visual};
-use crate::objects::Objects::{Line, Point, Polygon, Quadrangle, Triangle};
+use crate::objects::{ComplexObjects, Visual};
+use crate::objects::ComplexObjects::{ Polygon, Quadrangle, ComplexTriangle};
 use crate::objects::Surface::Flat;
 
 
