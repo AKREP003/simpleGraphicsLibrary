@@ -18,7 +18,7 @@ static init:bool = true;
 
 fn oct() -> Option<State> {
 
-    if !init {
+    if !&init {
         return None
     }
 
