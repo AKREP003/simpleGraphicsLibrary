@@ -20,7 +20,7 @@ use crate::render::{State};
 
 type DrawCallback = fn(&mut Vec<u8>, objects: Vec<ComplexObjects>);
 
-type EventLoop = fn() -> Option<State>;
+type EventLoop = unsafe fn() -> Option<State>;
 
 static mut DRAW_CALLBACK: Option<DrawCallback> = None;
 

@@ -7,6 +7,7 @@ use crate::objects::ComplexObjects::ComplexTriangle;
 use crate::objects::GraphicObjects::Triangle;
 use crate::objects::Surface::Flat;
 use crate::render::State;
+use crate::triD::CartesianCoordinate;
 
 pub type Visual = Vec<u8>;
 
@@ -20,18 +21,19 @@ pub trait Compile {
 }
 
 type Colour = (u8, u8, u8, u8);
-type Coordinate = (i32, i32);
+type DiCoordinate = (i32, i32);
 
 
-fn indexify(c:&Coordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
+fn indexify(c:&DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
+#[derive(Clone, Debug)]
 pub enum GraphicObjects {
 
-    Pixel(Coordinate, Colour),
+    Pixel(DiCoordinate, Colour),
 
-    Line(Coordinate, Coordinate, Colour),
+    Line(DiCoordinate, DiCoordinate, Colour),
 
-    Triangle(Coordinate, Coordinate, Coordinate, Surface),
+    Triangle(DiCoordinate, DiCoordinate, DiCoordinate, Surface),
 
 
 }
@@ -99,7 +101,6 @@ impl Rend for GraphicObjects {
                 coords.sort_by(|a, b| (a.0).cmp(&b.0));
 
                 let coordinates = (*coords.get(0).unwrap(), *coords.get(1).unwrap(), *coords.get(2).unwrap());
-
                 if coordinates.0.0 == coords.get(1).unwrap().0 {
                     let lines = vec![
                         line_between_points(coordinates.0, coordinates.2),
@@ -183,7 +184,7 @@ fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
     }
 
 
-fn line_between_points(p1: Coordinate, p2: Coordinate) -> Option<InfLine> {
+fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine> {
     let dx = p2.0 - p1.0;
     let dy = p2.1 - p1.1;
 
@@ -202,13 +203,73 @@ fn line_between_points(p1: Coordinate, p2: Coordinate) -> Option<InfLine> {
 #[derive(Clone, Debug)]
 pub enum ComplexObjects {
 
-    ComplexTriangle(Coordinate, Coordinate, Coordinate, Surface),
+    ComplexTriangle(DiCoordinate, DiCoordinate, DiCoordinate, Surface),
 
-    Quadrangle(Coordinate, Coordinate, Coordinate, Coordinate, Surface),
+    Quadrangle(DiCoordinate, DiCoordinate, DiCoordinate, DiCoordinate, Surface),
 
-    Polygon(u32, u32, Coordinate, Surface),
+    Polygon(u32, u32, DiCoordinate, Surface),
 
 }
+
+type Transformer = ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64));
+
+pub fn matrix_mult(
+    vector: (i32, i32, i32),
+    matrix: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64))
+) -> (i32, i32, i32) {
+
+     (
+        (vector.0 as f64 * matrix.0 .0 + vector.1 as f64 * matrix.1 .0 + vector.2 as f64 * matrix.2 .0).ceil() as i32,
+        (vector.0 as f64 * matrix.0 .1 + vector.1 as f64 * matrix.1 .1 + vector.2 as f64 * matrix.2 .1).ceil() as i32,
+        (vector.0 as f64* matrix.0 .2 + vector.1 as f64 * matrix.1 .2 + vector.2 as f64 * matrix.2 .2).ceil() as i32,
+    )
+}
+
+fn di_to_tri((x, y): DiCoordinate) -> CartesianCoordinate { (x, y, 0) }
+fn tri_to_di((x, y, _) : CartesianCoordinate) -> DiCoordinate {(x, y)}
+
+pub fn matrix_sub((x1, y1, z1) : CartesianCoordinate, (x2, y2, z2) : CartesianCoordinate) -> CartesianCoordinate {(x1 - x2, y1 - y2, z1 - z2)}
+pub fn matrix_add((x1, y1, z1) : CartesianCoordinate, (x2, y2, z2) : CartesianCoordinate) -> CartesianCoordinate {(x1 + x2, y1 + y2, z1 + z2)}
+
+pub fn transform_coordinate(x:CartesianCoordinate, t_matrix:Transformer, pivot:CartesianCoordinate) -> CartesianCoordinate {
+
+    matrix_add(pivot, matrix_mult(matrix_sub(x, pivot.clone() ), t_matrix) )
+
+}
+
+pub trait Transformation<Pivot> {
+
+    fn transform(&mut self, trans: Transformer, pivot: Pivot);
+
+}
+
+impl Transformation<DiCoordinate> for ComplexObjects {
+    fn transform(&mut self, trans: Transformer, pivot: DiCoordinate) {
+
+        match self {
+            ComplexTriangle(p1, p2, p3, _) => {
+
+                *p1 = tri_to_di(transform_coordinate(di_to_tri(*p1), trans, di_to_tri(pivot)));
+                *p2 = tri_to_di(transform_coordinate(di_to_tri(*p2), trans, di_to_tri(pivot)));
+                *p3 = tri_to_di(transform_coordinate(di_to_tri(*p3), trans, di_to_tri(pivot)));
+
+            }
+            ComplexObjects::Quadrangle(p1, p2, p3, p4, _) => {
+
+                *p1 = tri_to_di(transform_coordinate(di_to_tri(*p1), trans, di_to_tri(pivot)));
+                *p2 = tri_to_di(transform_coordinate(di_to_tri(*p2), trans, di_to_tri(pivot)));
+                *p3 = tri_to_di(transform_coordinate(di_to_tri(*p3), trans, di_to_tri(pivot)));
+                *p4 = tri_to_di(transform_coordinate(di_to_tri(*p4), trans, di_to_tri(pivot)));
+
+            }
+            ComplexObjects::Polygon(_, _, _, _) => {
+                panic!("don't")
+            }
+        }
+
+    }
+}
+
 
 impl Compile for ComplexObjects {
     fn compile(&self) -> Vec<GraphicObjects> {
@@ -256,7 +317,7 @@ impl Compile for ComplexObjects {
 
             ComplexObjects::Quadrangle(coordinate1, coordinate2, coordinate3, coordinate4, surface) => {
 
-                let mut sorted_by_x:Vec<Coordinate> = vec![*coordinate1, *coordinate2, *coordinate3, *coordinate4];
+                let mut sorted_by_x:Vec<DiCoordinate> = vec![*coordinate1, *coordinate2, *coordinate3, *coordinate4];
 
                 sorted_by_x.sort_by(|a, b| (a.0).cmp(&b.0));
 
@@ -292,7 +353,7 @@ impl Compile for ComplexObjects {
 
             ComplexObjects::Polygon(n, radius, center, surface) => {
 
-                let mut coordinates: Vec<Coordinate> = vec![];
+                let mut coordinates: Vec<DiCoordinate> = vec![];
 
                 for i in 0 .. *n {
 

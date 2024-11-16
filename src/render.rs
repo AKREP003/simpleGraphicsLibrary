@@ -8,7 +8,7 @@ use crate::objects::Compile;
 
 
 
-pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<ComplexObjects>) {
+pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<ComplexObjects>) {
 
     unsafe {
 
@@ -25,6 +25,7 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<ComplexObjects>) 
 
 
         }
+
 
         for graphic in objectBuffer {
 

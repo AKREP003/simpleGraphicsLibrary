@@ -1,6 +1,8 @@
 #![feature(core_intrinsics)]
 #![feature(let_chains)]
 
+extern crate core;
+
 mod WINdisplay;
 mod render;
 mod objects;
@@ -11,25 +13,32 @@ use std::f32::consts::PI;
 use objects::Rend;
 use WINdisplay::{HEIGHT, run_window, WIDTH};
 use render::{draw_gradient, State};
-use crate::objects::{ComplexObjects, Visual};
+use crate::objects::{Compile, ComplexObjects, Transformation, Visual};
 use crate::objects::ComplexObjects::{ Polygon, Quadrangle, ComplexTriangle};
 use crate::objects::Surface::Flat;
 
 
-static init:bool = true;
+static mut init:bool = true;
 
-fn oct() -> Option<State> {
+static r30: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64)) = (
+(0.866, -0.5, 0.0),
+(0.5, 0.866, 0.0),
+(0.0, 0.0, 1.0)
+);
 
-    if !&init {
-        return None
-    }
+static mut SHAPE:ComplexObjects = ComplexTriangle((WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100), Flat((100, 200, 0, 0)));
+
+unsafe fn oct() -> Option<State> {
+
+    init = false;
+
+    SHAPE.transform(r30, (WIDTH / 2, HEIGHT / 2));
 
     Some(State {
         objects:vec![
-            Polygon(4, 100, (200, 200), Flat((100, 200, 0, 0)))
-
+            SHAPE.clone()
         ],
-        canvas:None
+        canvas:Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize])
     })
 
 
