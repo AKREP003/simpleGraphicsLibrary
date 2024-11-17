@@ -16,9 +16,9 @@ pub const WIDTH: i32 = 640;
 pub const HEIGHT: i32 = 480;
 
 use crate::objects::ComplexObjects;
-use crate::render::{State};
+use crate::render::{Arche, State};
 
-type DrawCallback = fn(&mut Vec<u8>, objects: Vec<ComplexObjects>);
+type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Arche>);
 
 type EventLoop = unsafe fn() -> Option<State>;
 

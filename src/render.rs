@@ -5,10 +5,10 @@ use std::thread;
 use crate::objects::ComplexObjects::Polygon;
 use crate::objects::Surface::Flat;
 use crate::objects::Compile;
+use crate::triD::TriObjects;
 
 
-
-pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<ComplexObjects>) {
+pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
 
     unsafe {
 
@@ -38,12 +38,27 @@ pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<ComplexObjects>)
 
 }
 
+pub enum Arche {
 
+    Tri(TriObjects),
+    Di(ComplexObjects),
+    Graphic(GraphicObjects)
 
+}
+
+impl Compile for Arche {
+    fn compile(&self) -> Vec<GraphicObjects> {
+        match self {
+            Arche::Tri(tri) => tri.compile(),
+            Arche::Di(di) => di.compile(),
+            Arche::Graphic(gr) => vec![gr.clone()]
+        }
+    }
+}
 
 pub struct State {
 
-    pub(crate) objects:Vec<ComplexObjects>,
+    pub(crate) objects:Vec<Arche>,
 
     pub canvas:Option<Visual>,
 

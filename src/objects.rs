@@ -20,8 +20,8 @@ pub trait Compile {
     fn compile(&self) -> Vec<GraphicObjects>;
 }
 
-type Colour = (u8, u8, u8, u8);
-type DiCoordinate = (i32, i32);
+pub type Colour = (u8, u8, u8, u8);
+pub type DiCoordinate = (i32, i32);
 
 
 fn indexify(c:&DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
@@ -211,7 +211,7 @@ pub enum ComplexObjects {
 
 }
 
-type Transformer = ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64));
+pub(crate) type Transformer = ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64));
 
 pub fn matrix_mult(
     vector: (i32, i32, i32),
@@ -239,12 +239,12 @@ pub fn transform_coordinate(x:CartesianCoordinate, t_matrix:Transformer, pivot:C
 
 pub trait Transformation<Pivot> {
 
-    fn transform(&mut self, trans: Transformer, pivot: Pivot);
+    fn rotate(&mut self, trans: Transformer, pivot: Pivot);
 
 }
 
 impl Transformation<DiCoordinate> for ComplexObjects {
-    fn transform(&mut self, trans: Transformer, pivot: DiCoordinate) {
+    fn rotate(&mut self, trans: Transformer, pivot: DiCoordinate) {
 
         match self {
             ComplexTriangle(p1, p2, p3, _) => {

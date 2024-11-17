@@ -16,27 +16,33 @@ use render::{draw_gradient, State};
 use crate::objects::{Compile, ComplexObjects, Transformation, Visual};
 use crate::objects::ComplexObjects::{ Polygon, Quadrangle, ComplexTriangle};
 use crate::objects::Surface::Flat;
+use crate::render::Arche::{Di, Tri};
+use crate::triD::TriObjects;
+use crate::triD::TriObjects::TriLine;
 
 
 static mut init:bool = true;
 
-static r30: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64)) = (
-(0.866, -0.5, 0.0),
-(0.5, 0.866, 0.0),
-(0.0, 0.0, 1.0)
-);
+static degree:f64 = 5.0;
 
 static mut SHAPE:ComplexObjects = ComplexTriangle((WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100), Flat((100, 200, 0, 0)));
+static mut TRILINE:TriObjects = TriLine((WIDTH / 2 + 100, (HEIGHT / 2) + 100, 1), (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1), (100, 200, 0, 0));
 
 unsafe fn oct() -> Option<State> {
 
+    let r30: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64)) = (
+        (degree.cos(), 0.0, degree.sin()),
+        (0.0, 1.0, 0.0),
+        (-degree.sin(), 0.0, degree.cos())
+    );
+
     init = false;
 
-    SHAPE.transform(r30, (WIDTH / 2, HEIGHT / 2));
+    TRILINE.rotate(r30, (WIDTH / 2, HEIGHT / 2, 0));
 
     Some(State {
         objects:vec![
-            SHAPE.clone()
+            Tri(TRILINE.clone())
         ],
         canvas:Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize])
     })
