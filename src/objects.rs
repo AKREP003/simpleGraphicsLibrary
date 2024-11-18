@@ -162,7 +162,7 @@ impl Rend for GraphicObjects {
 }
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum Surface {
 
     Flat(Colour)
@@ -200,7 +200,7 @@ fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine> {
 }
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum ComplexObjects {
 
     ComplexTriangle(DiCoordinate, DiCoordinate, DiCoordinate, Surface),

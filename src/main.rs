@@ -7,6 +7,7 @@ mod WINdisplay;
 mod render;
 mod objects;
 mod triD;
+mod graphics;
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
@@ -27,6 +28,7 @@ static degree:f64 = 5.0;
 
 static mut SHAPE:ComplexObjects = ComplexTriangle((WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100), Flat((100, 200, 0, 0)));
 static mut TRILINE:TriObjects = TriLine((WIDTH / 2 + 100, (HEIGHT / 2) + 100, 1), (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1), (100, 200, 0, 0));
+static mut TRITRIANGLE:TriObjects = TriObjects::TriTriangle((WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 100, 0), Flat((100, 200, 0, 0)));
 
 unsafe fn oct() -> Option<State> {
 
@@ -38,11 +40,11 @@ unsafe fn oct() -> Option<State> {
 
     init = false;
 
-    TRILINE.rotate(r30, (WIDTH / 2, HEIGHT / 2, 0));
+    TRITRIANGLE.rotate(r30, (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1));
 
     Some(State {
         objects:vec![
-            Tri(TRILINE.clone())
+            Tri(TRITRIANGLE.clone())
         ],
         canvas:Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize])
     })
