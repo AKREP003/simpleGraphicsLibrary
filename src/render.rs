@@ -8,7 +8,6 @@ use crate::graphics::Surface::Flat;
 use crate::graphics::Compile;
 use crate::TriGraphics::TriObjects;
 
-
 pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
 
     unsafe {

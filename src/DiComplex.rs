@@ -38,7 +38,7 @@ pub fn matrix_sub((x1, y1, z1) : CartesianCoordinate, (x2, y2, z2) : CartesianCo
 
 pub fn matrix_add((x1, y1, z1) : CartesianCoordinate, (x2, y2, z2) : CartesianCoordinate) -> CartesianCoordinate {(x1 + x2, y1 + y2, z1 + z2)}
 
-pub fn transform_coordinate(x:CartesianCoordinate, t_matrix:Transformer, pivot:CartesianCoordinate) -> CartesianCoordinate {
+pub fn rotate_coordinate(x:CartesianCoordinate, t_matrix:Transformer, pivot:CartesianCoordinate) -> CartesianCoordinate {
 
     matrix_add(pivot, matrix_mult(matrix_sub(x, pivot.clone() ), t_matrix) )
 
@@ -50,17 +50,17 @@ impl Transformation<DiCoordinate> for ComplexObjects {
         match self {
             ComplexTriangle(p1, p2, p3, _) => {
 
-                *p1 = tri_to_di(transform_coordinate(di_to_tri(*p1), trans, di_to_tri(pivot)));
-                *p2 = tri_to_di(transform_coordinate(di_to_tri(*p2), trans, di_to_tri(pivot)));
-                *p3 = tri_to_di(transform_coordinate(di_to_tri(*p3), trans, di_to_tri(pivot)));
+                *p1 = tri_to_di(rotate_coordinate(di_to_tri(*p1), trans, di_to_tri(pivot)));
+                *p2 = tri_to_di(rotate_coordinate(di_to_tri(*p2), trans, di_to_tri(pivot)));
+                *p3 = tri_to_di(rotate_coordinate(di_to_tri(*p3), trans, di_to_tri(pivot)));
 
             }
             ComplexObjects::Quadrangle(p1, p2, p3, p4, _) => {
 
-                *p1 = tri_to_di(transform_coordinate(di_to_tri(*p1), trans, di_to_tri(pivot)));
-                *p2 = tri_to_di(transform_coordinate(di_to_tri(*p2), trans, di_to_tri(pivot)));
-                *p3 = tri_to_di(transform_coordinate(di_to_tri(*p3), trans, di_to_tri(pivot)));
-                *p4 = tri_to_di(transform_coordinate(di_to_tri(*p4), trans, di_to_tri(pivot)));
+                *p1 = tri_to_di(rotate_coordinate(di_to_tri(*p1), trans, di_to_tri(pivot)));
+                *p2 = tri_to_di(rotate_coordinate(di_to_tri(*p2), trans, di_to_tri(pivot)));
+                *p3 = tri_to_di(rotate_coordinate(di_to_tri(*p3), trans, di_to_tri(pivot)));
+                *p4 = tri_to_di(rotate_coordinate(di_to_tri(*p4), trans, di_to_tri(pivot)));
 
             }
             ComplexObjects::Polygon(_, _, _, _) => {

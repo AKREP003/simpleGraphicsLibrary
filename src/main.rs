@@ -11,6 +11,7 @@ mod DiComplex;
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
+use std::time::{Duration, Instant};
 use DiComplex::ComplexObjects;
 use graphics::Rend;
 use WINdisplay::{HEIGHT, run_window, WIDTH};
@@ -25,13 +26,23 @@ use crate::TriGraphics::TriObjects::TriLine;
 
 static mut init:bool = true;
 
-static degree:f64 = 5.0;
+static degree:f64 = 0.1;
 
 static mut SHAPE:ComplexObjects = ComplexTriangle((WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100), Flat((100, 200, 0, 0)));
 static mut TRILINE:TriObjects = TriLine((WIDTH / 2 + 100, (HEIGHT / 2) + 100, 1), (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1), (100, 200, 0, 0));
 static mut TRITRIANGLE:TriObjects = TriObjects::TriTriangle((WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 100, 0), Flat((100, 200, 0, 0)));
+static mut TRIQUADRANGLE:TriObjects = TriObjects::TriQuadrangle((WIDTH / 2, HEIGHT / 2, 1), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 50, 1), (100 + (WIDTH / 2), (HEIGHT / 2) + 50, 1), Flat((100, 200, 0, 0)));
+
+static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
+// todo: https://en.wikipedia.org/wiki/3D_projection
 
 unsafe fn oct() -> Option<State> {
+
+    let now = Instant::now();
+
+    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(50) {
+        return None
+    } else { LAST_RUN_TIME = Some(now); }
 
     let r30: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64)) = (
         (degree.cos(), 0.0, degree.sin()),
@@ -41,7 +52,7 @@ unsafe fn oct() -> Option<State> {
 
     init = false;
 
-    TRITRIANGLE.rotate(r30, (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1));
+    TRITRIANGLE.rotate(r30, (WIDTH / 2, (HEIGHT / 2), 1));
 
     Some(State {
         objects:vec![
@@ -58,6 +69,7 @@ fn main() {
 
 
     unsafe {
+        LAST_RUN_TIME = Some(Instant::now());
 
         run_window(draw_gradient, oct);
 

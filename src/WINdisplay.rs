@@ -1,6 +1,6 @@
 use std::{ptr, thread};
 use std::ffi::CString;
-use std::time::Duration;
+use std::time::{Duration};
 use winapi::um::wingdi::{BITMAPINFO, BITMAPINFOHEADER, BI_RGB, SetDIBitsToDevice, RGBQUAD};
 use winapi::um::winuser::{
     CreateWindowExA, DefWindowProcA, DispatchMessageA, GetDC, LoadCursorW, RegisterClassA,

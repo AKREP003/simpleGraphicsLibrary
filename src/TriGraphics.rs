@@ -1,6 +1,6 @@
-use crate::DiComplex::{transform_coordinate, Transformer};
+use crate::DiComplex::{rotate_coordinate, Transformer};
 use crate::graphics::{Colour, Compile, GraphicObjects, Surface, Transformation};
-use crate::DiComplex::ComplexObjects::ComplexTriangle;
+use crate::DiComplex::ComplexObjects::{ComplexTriangle, Quadrangle};
 
 pub type SphericalCoordinate = (f32, f32, f32);
 pub type CartesianCoordinate = (i32, i32, i32);
@@ -17,7 +17,8 @@ fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
 #[derive(Clone, Copy)]
 pub enum TriObjects {
     TriLine(CartesianCoordinate, CartesianCoordinate, Colour),
-    TriTriangle(CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, Surface)
+    TriTriangle(CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, Surface),
+    TriQuadrangle(CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, Surface),
 }
 
 
@@ -37,6 +38,14 @@ impl Compile for TriObjects {
 
                 return buffer.compile();
 
+            },
+
+            TriObjects::TriQuadrangle((x1, y1, _), (x2, y2, _), (x3, y3, _), (x4, y4, _), c) => {
+                let buffer = Quadrangle((*x1, *y1), (*x2, *y2), (*x3, *y3), (*x4, *y4),(*c).clone());
+
+                let mut result = buffer.compile();
+
+                return result;
             }
         }
 
@@ -45,24 +54,29 @@ impl Compile for TriObjects {
 }
 
 impl Transformation<CartesianCoordinate> for TriObjects {
-
     fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
-
         match self {
             TriObjects::TriLine(x, y, _) => {
-
-                *x = transform_coordinate(*x, trans, pivot);
-                *y = transform_coordinate(*y, trans, pivot);
-
+                *x = rotate_coordinate(*x, trans, pivot);
+                *y = rotate_coordinate(*y, trans, pivot);
             },
 
             TriObjects::TriTriangle(x, y, z, _) => {
-                *x = transform_coordinate(*x, trans, pivot);
-                *y = transform_coordinate(*y, trans, pivot);
-                *z = transform_coordinate(*z, trans, pivot);
+                *x = rotate_coordinate(*x, trans, pivot);
+                *y = rotate_coordinate(*y, trans, pivot);
+                *z = rotate_coordinate(*z, trans, pivot);
+            },
+
+            TriObjects::TriQuadrangle(x, y, z, w, _) => {
+                *x = rotate_coordinate(*x, trans, pivot);
+
+                *y = rotate_coordinate(*y, trans, pivot);
+
+                *z = rotate_coordinate(*z, trans, pivot);
+                *w = rotate_coordinate(*w, trans, pivot);
+
             }
         }
-
     }
 
 }
