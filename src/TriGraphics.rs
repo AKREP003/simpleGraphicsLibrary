@@ -1,5 +1,6 @@
-use crate::objects::{Colour, Compile, GraphicObjects, Surface, transform_coordinate, Transformation, Transformer};
-use crate::objects::ComplexObjects::ComplexTriangle;
+use crate::DiComplex::{transform_coordinate, Transformer};
+use crate::graphics::{Colour, Compile, GraphicObjects, Surface, Transformation};
+use crate::DiComplex::ComplexObjects::ComplexTriangle;
 
 pub type SphericalCoordinate = (f32, f32, f32);
 pub type CartesianCoordinate = (i32, i32, i32);

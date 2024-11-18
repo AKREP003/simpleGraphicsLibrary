@@ -15,7 +15,7 @@ use winapi::shared::ntdef::LPCSTR;
 pub const WIDTH: i32 = 640;
 pub const HEIGHT: i32 = 480;
 
-use crate::objects::ComplexObjects;
+use crate::DiComplex::ComplexObjects;
 use crate::render::{Arche, State};
 
 type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Arche>);

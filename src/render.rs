@@ -1,11 +1,12 @@
 
 use crate::{HEIGHT, WIDTH};
-use crate::objects::{ComplexObjects, GraphicObjects, Rend, Visual};
+use crate::graphics::{GraphicObjects, Rend, Visual};
 use std::thread;
-use crate::objects::ComplexObjects::Polygon;
-use crate::objects::Surface::Flat;
-use crate::objects::Compile;
-use crate::triD::TriObjects;
+use crate::DiComplex::ComplexObjects;
+use crate::DiComplex::ComplexObjects::Polygon;
+use crate::graphics::Surface::Flat;
+use crate::graphics::Compile;
+use crate::TriGraphics::TriObjects;
 
 
 pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {

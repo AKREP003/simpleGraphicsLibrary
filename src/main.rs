@@ -5,21 +5,22 @@ extern crate core;
 
 mod WINdisplay;
 mod render;
-mod objects;
-mod triD;
 mod graphics;
+mod TriGraphics;
+mod DiComplex;
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
-use objects::Rend;
+use DiComplex::ComplexObjects;
+use graphics::Rend;
 use WINdisplay::{HEIGHT, run_window, WIDTH};
 use render::{draw_gradient, State};
-use crate::objects::{Compile, ComplexObjects, Transformation, Visual};
-use crate::objects::ComplexObjects::{ Polygon, Quadrangle, ComplexTriangle};
-use crate::objects::Surface::Flat;
+use crate::graphics::{Compile, Transformation, Visual};
+use DiComplex::ComplexObjects::{ComplexTriangle, Polygon, Quadrangle};
+use crate::graphics::Surface::Flat;
 use crate::render::Arche::{Di, Tri};
-use crate::triD::TriObjects;
-use crate::triD::TriObjects::TriLine;
+use crate::TriGraphics::TriObjects;
+use crate::TriGraphics::TriObjects::TriLine;
 
 
 static mut init:bool = true;
