@@ -8,6 +8,7 @@ mod render;
 mod graphics;
 mod TriGraphics;
 mod DiComplex;
+mod TriComplex;
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
@@ -19,24 +20,31 @@ use render::{draw_gradient, State};
 use crate::graphics::{Compile, Transformation, Visual};
 use DiComplex::ComplexObjects::{ComplexTriangle, Polygon, Quadrangle};
 use crate::graphics::Surface::Flat;
-use crate::render::Arche::{Di, Tri};
+use crate::render::Arche::{Di, Tri, TriC};
+use crate::TriComplex::TriComplexes;
+use crate::TriComplex::TriComplexes::RectangularPrism;
 use crate::TriGraphics::TriObjects;
 use crate::TriGraphics::TriObjects::TriLine;
 
 
+
 static mut init:bool = true;
 
-static degree:f64 = 0.1;
+static degree:f64 = 45.0;
 
 static mut SHAPE:ComplexObjects = ComplexTriangle((WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100), Flat((100, 200, 0, 0)));
 static mut TRILINE:TriObjects = TriLine((WIDTH / 2 + 100, (HEIGHT / 2) + 100, 1), (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1), (100, 200, 0, 0));
 static mut TRITRIANGLE:TriObjects = TriObjects::TriTriangle((WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 100, 0), Flat((100, 200, 0, 0)));
 static mut TRIQUADRANGLE:TriObjects = TriObjects::TriQuadrangle((WIDTH / 2, HEIGHT / 2, 1), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 50, 1), (100 + (WIDTH / 2), (HEIGHT / 2) + 50, 1), Flat((100, 200, 0, 0)));
 
+static mut cube : TriComplexes = RectangularPrism((100, 100, 100), (100, 100, 200), (100, 200, 100), (100, 200, 200), (200, 100, 100), (200, 100, 200), (200, 200, 100), (200, 200, 200), Flat((100, 200, 0, 0)));
+
 static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
 // todo: https://en.wikipedia.org/wiki/3D_projection
 
 unsafe fn oct() -> Option<State> {
+
+
 
     let now = Instant::now();
 
@@ -52,11 +60,11 @@ unsafe fn oct() -> Option<State> {
 
     init = false;
 
-    TRITRIANGLE.rotate(r30, (WIDTH / 2, (HEIGHT / 2), 1));
+    TRIQUADRANGLE.rotate(r30, (WIDTH / 2, (HEIGHT / 2), 1));
 
     Some(State {
         objects:vec![
-            Tri(TRITRIANGLE.clone())
+            Tri(TRIQUADRANGLE.clone())
         ],
         canvas:Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize])
     })

@@ -6,6 +6,7 @@ use crate::DiComplex::ComplexObjects;
 use crate::DiComplex::ComplexObjects::Polygon;
 use crate::graphics::Surface::Flat;
 use crate::graphics::Compile;
+use crate::TriComplex::TriComplexes;
 use crate::TriGraphics::TriObjects;
 
 pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
@@ -40,6 +41,7 @@ pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
 
 pub enum Arche {
 
+    TriC(TriComplexes),
     Tri(TriObjects),
     Di(ComplexObjects),
     Graphic(GraphicObjects)
@@ -51,7 +53,8 @@ impl Compile for Arche {
         match self {
             Arche::Tri(tri) => tri.compile(),
             Arche::Di(di) => di.compile(),
-            Arche::Graphic(gr) => vec![gr.clone()]
+            Arche::Graphic(gr) => vec![gr.clone()],
+            Arche::TriC(tri) => tri.compile()
         }
     }
 }
