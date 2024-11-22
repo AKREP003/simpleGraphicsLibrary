@@ -2,16 +2,15 @@ use std::cmp::{max, min};
 use std::f32::consts::PI;
 use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
-use crate::{HEIGHT, WIDTH};
+use crate::{HEIGHT, init, WIDTH};
 use crate::DiComplex::ComplexObjects::ComplexTriangle;
-use crate::DiComplex::Transformer;
+use crate::transitions::Transformer;
 use crate::graphics::GraphicObjects::Triangle;
 use crate::graphics::Surface::Flat;
 use crate::render::State;
 use crate::TriGraphics::CartesianCoordinate;
 
 pub type Visual = Vec<u8>;
-
 
 pub trait Rend {
     fn rend(&self, rendered: &mut Visual);
@@ -22,10 +21,91 @@ pub trait Compile {
 }
 
 pub type Colour = (u8, u8, u8, u8);
+
 pub type DiCoordinate = (i32, i32);
 
-
 fn indexify(c:&DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
+
+#[derive(Clone, Debug)]
+pub struct GraphicTriangle {
+
+    lines : [InfLine; 2],
+
+    pub coords : [DiCoordinate; 3],
+
+    direction : bool,
+
+    surf : Surface
+
+}
+
+impl GraphicTriangle {
+
+    pub fn construct(mut coords : [DiCoordinate; 3], surf : Surface) -> GraphicObjects{
+
+        coords.sort_by(|a, b| (a.0).cmp(&b.0));
+
+        let mut lines : [InfLine; 2];
+
+        let direction = coords[0].0 == coords[1].0;
+
+        if  direction {
+            lines = [
+                line_between_points(coords[0], coords[2]),
+                line_between_points(coords[1], coords[2])
+            ].into_iter().filter_map(|x| x).collect::<Vec<(f32, i32)>>().try_into().expect("eee");
+        } else if coords[1].0 == coords[2].0 {
+
+            lines = [
+                line_between_points(coords[0], coords[1]),
+                line_between_points(coords[0], coords[2])
+            ].into_iter().filter_map(|x| x).collect::<Vec<(f32, i32)>>().try_into().expect("eee");
+        } else {
+
+            panic!("use the complex triangle, dont fuck with graphic triangles")
+
+        }
+
+        return Triangle(GraphicTriangle {lines, coords, direction, surf });
+
+    }
+
+}
+
+impl Rend for GraphicTriangle {
+    fn rend(&self, rendered: &mut Visual) {
+
+        if self.direction {
+
+            for x in 0..self.coords[2].0 - self.coords[0].0 {
+                let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
+                let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
+
+                for y in min(y1, y2)..max(y1, y2) {
+                    paint_it(rendered, self.surf, &(x + self.coords[0].0, y))
+                }
+
+            }
+
+        } else {
+
+            for x in 0..self.coords[1].0 - self.coords[0].0 {
+                let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
+                let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
+
+                for y in min(y1, y2)..max(y1, y2) {
+
+                    paint_it(rendered, self.surf, &(x + self.coords[0].0, y))
+
+                }
+            }
+        }
+
+    }
+}
+
+
+
 
 #[derive(Clone, Debug)]
 pub enum GraphicObjects {
@@ -34,10 +114,11 @@ pub enum GraphicObjects {
 
     Line(DiCoordinate, DiCoordinate, Colour),
 
-    Triangle(DiCoordinate, DiCoordinate, DiCoordinate, Surface),
+    Triangle(GraphicTriangle),
 
 
 }
+
 impl Rend for GraphicObjects {
 
     fn rend(&self, rendered: &mut Visual) {
@@ -95,73 +176,12 @@ impl Rend for GraphicObjects {
                 }
             },
 
-
-            GraphicObjects::Triangle(coordinate1, coordinate2, coordinate3, surface) => {
-                let mut coords = vec![*coordinate1, *coordinate2, *coordinate3];
-
-                coords.sort_by(|a, b| (a.0).cmp(&b.0));
-
-                let coordinates = (*coords.get(0).unwrap(), *coords.get(1).unwrap(), *coords.get(2).unwrap());
-                if coordinates.0.0 == coords.get(1).unwrap().0 {
-                    let lines = vec![
-                        line_between_points(coordinates.0, coordinates.2),
-                        line_between_points(coordinates.1, coordinates.2)
-                    ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
-
-
-                    for x in 0..coordinates.2.0 - coordinates.0.0 {
-                        let y1 = crossing_point(x, lines.get(0).copied()).unwrap();
-                        let y2 = crossing_point(x, lines.get(1).copied()).unwrap();
-
-
-                        for y in min(y1, y2)..max(y1, y2) {
-                            let index: usize = indexify(&(x + coordinates.0.0, y));
-
-                            match surface {
-                                Flat(colour) => {
-                                    rendered[index] = colour.0;
-                                    rendered[index + 1] = colour.1;
-                                    rendered[index + 2] = colour.2;
-                                    rendered[index + 3] = colour.3;
-                                }
-                            }
-                        }
-                    }
-                } else if coordinates.1.0 == coordinates.2.0 {
-                    let lines = vec![
-                        line_between_points(coordinates.0, coordinates.1),
-                        line_between_points(coordinates.0, coordinates.2)
-                    ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>();
-
-                    for x in 0..coordinates.1.0 - coordinates.0.0 {
-                        let y1 = crossing_point(x, lines.get(0).copied()).unwrap();
-                        let y2 = crossing_point(x, lines.get(1).copied()).unwrap();
-
-                        for y in min(y1, y2)..max(y1, y2) {
-                            let index: usize = indexify(&(x + coordinates.0.0, y));
-
-                            match surface {
-                                Flat(colour) => {
-                                    rendered[index] = colour.0;
-                                    rendered[index + 1] = colour.1;
-                                    rendered[index + 2] = colour.2;
-                                    rendered[index + 3] = colour.3;
-                                }
-                            }
-                        }
-                    }
-                } else {
-
-                    panic!("use the complex triangle, dont fuck with graphic triangles")
-
-                }
-            }
+            GraphicObjects::Triangle(G) => { G.rend(rendered) }
         }
 
     }
 
 }
-
 
 #[derive(Clone, Debug, Copy)]
 pub enum Surface {
@@ -184,8 +204,7 @@ pub fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
 
     }
 
-
-pub fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine> {
+pub  fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine> {
     let dx = p2.0 - p1.0;
     let dy = p2.1 - p1.1;
 
@@ -198,6 +217,21 @@ pub fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine
     let intercept = p1.1;  //(p1.1 as f32 - (slope * p1.0 as f32)) as i32;
 
     Some((slope, intercept))
+}
+
+fn paint_it(rendered : &mut Visual, surface : Surface, cord : &DiCoordinate) {
+
+    let index = indexify(cord);
+
+    match surface {
+        Flat(colour) => {
+            rendered[index] = colour.0;
+            rendered[index + 1] = colour.1;
+            rendered[index + 2] = colour.2;
+            rendered[index + 3] = colour.3;
+        }
+    }
+
 }
 
 pub trait Transformation<Pivot> {

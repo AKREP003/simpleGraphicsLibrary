@@ -1,5 +1,5 @@
-use crate::DiComplex::{rotate_coordinate, Transformer};
 use crate::graphics::{Compile, GraphicObjects, Surface, Transformation};
+use crate::transitions::{rotate_coordinate, Transformer};
 use crate::TriGraphics::CartesianCoordinate;
 use crate::TriGraphics::TriObjects::*;
 
