@@ -3,8 +3,8 @@ use std::f32::consts::PI;
 use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
 use crate::{HEIGHT, init, WIDTH};
-use crate::DiComplex::ComplexObjects::ComplexTriangle;
-use crate::transitions::Transformer;
+use crate::DiComplex::ComplexObjects::CTriangle;
+use crate::transitions::{rotate_coordinate, Transformation, Transformer};
 use crate::graphics::GraphicObjects::Triangle;
 use crate::graphics::Surface::Flat;
 use crate::render::State;
@@ -35,13 +35,13 @@ pub struct GraphicTriangle {
 
     direction : bool,
 
-    surf : Surface
+    pub surf : Surface
 
 }
 
 impl GraphicTriangle {
 
-    pub fn construct(mut coords : [DiCoordinate; 3], surf : Surface) -> GraphicObjects{
+    pub fn construct(mut coords : [DiCoordinate; 3], surf : Surface) -> GraphicTriangle{
 
         coords.sort_by(|a, b| (a.0).cmp(&b.0));
 
@@ -66,9 +66,12 @@ impl GraphicTriangle {
 
         }
 
-        return Triangle(GraphicTriangle {lines, coords, direction, surf });
+        return GraphicTriangle {lines, coords, direction, surf };
 
     }
+
+    pub fn into(&self) -> GraphicObjects {Triangle(*self)}
+
 
 }
 
@@ -231,12 +234,6 @@ fn paint_it(rendered : &mut Visual, surface : Surface, cord : &DiCoordinate) {
             rendered[index + 3] = colour.3;
         }
     }
-
-}
-
-pub trait Transformation<Pivot> {
-
-    fn rotate(&mut self, trans: Transformer, pivot: Pivot);
 
 }
 

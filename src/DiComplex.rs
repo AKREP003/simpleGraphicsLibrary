@@ -1,33 +1,35 @@
 use std::f32::consts::PI;
-use crate::DiComplex::ComplexObjects::ComplexTriangle;
+use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::{graphics, transitions};
-use crate::graphics::{Compile, DiCoordinate, GraphicObjects, GraphicTriangle, Surface, Transformation};
+use crate::graphics::{Compile, DiCoordinate, GraphicObjects, GraphicTriangle, Surface};
 use crate::graphics::GraphicObjects::Triangle;
-use crate::transitions::Transformer;
+use crate::transitions::{Transformation, Transformer};
 use crate::TriGraphics::CartesianCoordinate;
 
 #[derive(Clone, Debug)]
-pub struct CompTriangle {
+pub struct ComplexTriangle {
 
-    sub_triangles : [Option<GraphicTriangle>; 2]
+    sub_triangles : [Option<GraphicTriangle>; 2],
+
+    coords : [DiCoordinate; 3],
 
 }
 
 
-impl CompTriangle {
+impl ComplexTriangle {
 
-   pub fn construct(coords : &mut [DiCoordinate; 3], surface : Surface) -> ComplexObjects{
+   pub fn construct(coords : &mut [DiCoordinate; 3], surface : Surface) -> ComplexTriangle{
 
-       let mut buffer = CompTriangle {
+       let mut buffer = ComplexTriangle {
            sub_triangles: [None, None],
-
+            coords : *coords
        };
 
        coords.sort_by(|a, b| (a.0).cmp(&b.0));
 
        if coords[0].0 == coords[1].0 || coords[1].0 == coords[2].0{
 
-           buffer.sub_triangles[0] = GraphicTriangle::construct( *coords, *surface);
+           buffer.sub_triangles[0] = Some(GraphicTriangle::construct( *coords, surface));
 
        } else {
 
@@ -35,28 +37,86 @@ impl CompTriangle {
 
            let next0 = (coords[1].0, graphics::crossing_point(coords[1].0 - coords[0].0, Some(line)).unwrap());
 
-           buffer.sub_triangles[0] = GraphicTriangle::construct( [coords[0], coords[1], next0,], *surface);
-           buffer.sub_triangles[1] = GraphicTriangle::construct([coords[2], coords[1], next0, ], *surface)
+           buffer.sub_triangles[0] = Some(GraphicTriangle::construct( [coords[0], coords[1], next0,], surface));
+           buffer.sub_triangles[1] = Some(GraphicTriangle::construct([coords[2], coords[1], next0, ], surface));
 
 
        }
 
-       return ComplexTriangle(buffer);
+       return buffer;
    }
 
 }
 
-impl Compile for CompTriangle {
+impl Compile for ComplexTriangle {
+    fn compile(&self) -> Vec<GraphicObjects> {
+
+        return self.sub_triangles.into_iter().filter_map(|x| x).map(|x| Triangle(x)).collect::<Vec<GraphicObjects>>();
+    }
+}
+
+impl Transformation<DiCoordinate> for ComplexTriangle {
+    fn rotate(&mut self, trans: Transformer, pivot: DiCoordinate) {
+
+        self = &mut ComplexTriangle::construct(&mut self.coords, self.sub_triangles[0].unwrap().surf.clone());
+
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct  Quadrangle {
+
+    side : [ComplexTriangle; 2]
+
+}
+
+impl Quadrangle {
+
+    pub fn construct(coords : &mut [DiCoordinate; 4], surface : Surface) -> ComplexObjects {
+
+        coords.sort_by(|a, b| (a.0).cmp(&b.0));
+
+        let mut grouping = (
+            [*coords.get(0).unwrap(), *coords.get(1).unwrap()],
+            [*coords.get(2).unwrap(), *coords.get(3).unwrap()]
+
+        );
+
+        grouping.0.sort_by(|a, b| (a.1).cmp(&b.1));
+        grouping.1.sort_by(|a, b| (a.1).cmp(&b.1));
+
+        return Qangle(Quadrangle {
+
+            side: [
+                 ComplexTriangle::construct(&mut [
+                    grouping.0.get(0).unwrap().clone(),
+                    grouping.0.get(1).unwrap().clone(),
+                    grouping.1.get(0).unwrap().clone()], surface.clone()),
+                 (ComplexTriangle::construct(&mut [
+                    grouping.1.get(1).unwrap().clone(),
+                    grouping.0.get(1).unwrap().clone(),
+                    grouping.1.get(0).unwrap().clone()], surface.clone()))
+            ]
+        });
+
+    }
+}
+
+impl Transformation<DiCoordinate> for Quadrangle {
+    fn rotate(&mut self, trans: Transformer, pivot: DiCoordinate) {
+
+        self.side.iter_mut().for_each(|x| x.rotate(trans, pivot));
+
+    }
+}
+
+impl Compile for Quadrangle {
     fn compile(&self) -> Vec<GraphicObjects> {
         let mut buffer = Vec::new();
 
-        for i in self.sub_triangles.iter() {
+        for i in self.side.iter() {
 
-            if let Some(triangle) = i {
-
-                buffer.append(&mut triangle.compile());
-
-            }
+            buffer.append(&mut i.compile());
 
         }
 
@@ -64,13 +124,12 @@ impl Compile for CompTriangle {
     }
 }
 
-
 #[derive(Clone, Debug)]
 pub enum ComplexObjects {
 
-    ComplexTriangle(CompTriangle),
+    CTriangle(ComplexTriangle),
 
-    Quadrangle(DiCoordinate, DiCoordinate, DiCoordinate, DiCoordinate, Surface),
+    Qangle(Quadrangle),
 
     Polygon(u32, u32, DiCoordinate, Surface),
 
@@ -80,19 +139,14 @@ impl Transformation<DiCoordinate> for ComplexObjects {
     fn rotate(&mut self, trans: Transformer, pivot: DiCoordinate) {
 
         match self {
-            ComplexTriangle(p1, p2, p3, _) => {
+            CTriangle(t) => {
 
-                *p1 = transitions::tri_to_di(transitions::rotate_coordinate(transitions::di_to_tri(*p1), trans, transitions::di_to_tri(pivot)));
-                *p2 = transitions::tri_to_di(transitions::rotate_coordinate(transitions::di_to_tri(*p2), trans, transitions::di_to_tri(pivot)));
-                *p3 = transitions::tri_to_di(transitions::rotate_coordinate(transitions::di_to_tri(*p3), trans, transitions::di_to_tri(pivot)));
+                t.rotate(trans, pivot)
 
             }
-            ComplexObjects::Quadrangle(p1, p2, p3, p4, _) => {
+            ComplexObjects::Qangle(t) => {
 
-                *p1 = transitions::tri_to_di(transitions::rotate_coordinate(transitions::di_to_tri(*p1), trans, transitions::di_to_tri(pivot)));
-                *p2 = transitions::tri_to_di(transitions::rotate_coordinate(transitions::di_to_tri(*p2), trans, transitions::di_to_tri(pivot)));
-                *p3 = transitions::tri_to_di(transitions::rotate_coordinate(transitions::di_to_tri(*p3), trans, transitions::di_to_tri(pivot)));
-                *p4 = transitions::tri_to_di(transitions::rotate_coordinate(transitions::di_to_tri(*p4), trans, transitions::di_to_tri(pivot)));
+                t.rotate(trans, pivot)
 
             }
             ComplexObjects::Polygon(_, _, _, _) => {
@@ -107,46 +161,16 @@ impl Compile for ComplexObjects {
     fn compile(&self) -> Vec<GraphicObjects> {
         match self {
 
-            ComplexObjects::ComplexTriangle(CompTriangle) => {
+            ComplexObjects::CTriangle(CompTriangle) => {
 
                 CompTriangle.compile()
 
             },
 
 
-            ComplexObjects::Quadrangle(coordinate1, coordinate2, coordinate3, coordinate4, surface) => {
+            ComplexObjects::Qangle(q) => {
 
-                let mut sorted_by_x:Vec<DiCoordinate> = vec![*coordinate1, *coordinate2, *coordinate3, *coordinate4];
-
-                sorted_by_x.sort_by(|a, b| (a.0).cmp(&b.0));
-
-                let mut grouping = (
-                    vec![*sorted_by_x.get(0).unwrap(), *sorted_by_x.get(1).unwrap()],
-                    vec![*sorted_by_x.get(2).unwrap(), *sorted_by_x.get(3).unwrap()]
-
-                );
-
-                grouping.0.sort_by(|a, b| (a.1).cmp(&b.1));
-                grouping.1.sort_by(|a, b| (a.1).cmp(&b.1));
-
-                return vec![
-                    Triangle(
-                        grouping.0.get(0).unwrap().clone(),
-                        grouping.0.get(1).unwrap().clone(),
-                        grouping.1.get(0).unwrap().clone(),
-                        (*surface).clone()
-
-                    ),
-                    Triangle(
-                        grouping.1.get(1).unwrap().clone(),
-                        grouping.0.get(1).unwrap().clone(),
-                        grouping.1.get(0).unwrap().clone(),
-                        (*surface).clone()
-
-                    )
-                ];
-
-
+                q.compile()
 
             }
 
@@ -162,20 +186,20 @@ impl Compile for ComplexObjects {
                     ));
                 }
 
-                let mut triangles:Vec<GraphicObjects> = vec![
-                    Triangle(coordinates.get(0).unwrap().clone(),
+                let mut triangles:Vec<GraphicObjects> =
+                    ComplexTriangle::construct(&mut [coordinates.get(0).unwrap().clone(),
                                     coordinates.get(coordinates.len() - 1).unwrap().clone(),
-                                    center.clone(),
-                                    surface.clone())
-                ];
+                                    center.clone()],
+                                    surface.clone()).compile();
+
 
                 for i in 0 .. coordinates.len() - 1 {
-                    triangles.push(Triangle(
-                        coordinates.get(i).unwrap().clone(),
-                        coordinates.get(i + 1).unwrap().clone(),
-                        center.clone(),
+                    triangles.append(&mut ComplexTriangle::construct(
+                        &mut [coordinates.get(i).unwrap().clone(),
+                            coordinates.get(i + 1).unwrap().clone(),
+                            center.clone()],
                         surface.clone()
-                    ))
+                    ).compile())
 
                 }
 

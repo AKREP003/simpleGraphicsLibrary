@@ -18,9 +18,9 @@ use DiComplex::ComplexObjects;
 use graphics::Rend;
 use WINdisplay::{HEIGHT, run_window, WIDTH};
 use render::{draw_gradient, State};
-use crate::graphics::{Compile, Transformation, Visual};
-use DiComplex::ComplexObjects::{ComplexTriangle, Polygon, Quadrangle};
-use crate::DiComplex::CompTriangle;
+use crate::graphics::{Compile, Visual};
+use DiComplex::ComplexObjects::{CTriangle, Polygon, Qangle};
+use crate::DiComplex::ComplexTriangle;
 use crate::graphics::Surface::Flat;
 use crate::render::Arche::{Di, Tri, TriC};
 use crate::TriComplex::TriComplexes;
@@ -28,6 +28,7 @@ use crate::TriComplex::TriComplexes::RectangularPrism;
 use crate::TriGraphics::TriObjects;
 use crate::TriGraphics::TriObjects::TriLine;
 use lazy_static::lazy_static;
+use transitions::Transformation;
 
 
 static mut init:bool = true;
@@ -36,7 +37,7 @@ static degree:f64 = 45.0;
 
 lazy_static! {
 
-    static ref SHAPE:ComplexObjects = CompTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0)));
+    static ref SHAPE:ComplexObjects = ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0)));
 
 
 }

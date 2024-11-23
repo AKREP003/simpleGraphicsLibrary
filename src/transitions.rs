@@ -28,3 +28,9 @@ pub fn rotate_coordinate(x:CartesianCoordinate, t_matrix:Transformer, pivot:Cart
     matrix_add(pivot, matrix_mult(matrix_sub(x, pivot.clone() ), t_matrix) )
 
 }
+
+pub trait Transformation<Pivot> {
+
+    fn rotate(&mut self, trans: Transformer, pivot: Pivot);
+
+}

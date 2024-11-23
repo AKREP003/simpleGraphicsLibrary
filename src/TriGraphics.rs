@@ -1,6 +1,7 @@
-use crate::graphics::{Colour, Compile, GraphicObjects, Surface, Transformation};
-use crate::DiComplex::ComplexObjects::{ComplexTriangle, Quadrangle};
-use crate::transitions::{rotate_coordinate, Transformer};
+use crate::graphics::{Colour, Compile, GraphicObjects, Surface};
+use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
+use crate::DiComplex::{ComplexTriangle, Quadrangle};
+use crate::transitions::{rotate_coordinate, Transformation, Transformer};
 
 pub type SphericalCoordinate = (f32, f32, f32);
 pub type CartesianCoordinate = (i32, i32, i32);
@@ -34,14 +35,14 @@ impl Compile for TriObjects {
 
             TriObjects::TriTriangle((x1, y1, _), (x2, y2, _), (x3, y3, _), c) => {
 
-                let buffer = ComplexTriangle((*x1, *y1), (*x2, *y2), (*x3, *y3), (*c).clone());
+                let buffer = ComplexTriangle::construct(&mut [(*x1, *y1), (*x2, *y2), (*x3, *y3)], (*c).clone());
 
                 return buffer.compile();
 
             },
 
             TriObjects::TriQuadrangle((x1, y1, _), (x2, y2, _), (x3, y3, _), (x4, y4, _), c) => {
-                let buffer = Quadrangle((*x1, *y1), (*x2, *y2), (*x3, *y3), (*x4, *y4),(*c).clone());
+                let buffer = Quadrangle::construct(&mut [(*x1, *y1), (*x2, *y2), (*x3, *y3), (*x4, *y4)], (*c).clone());
 
                 let mut result = buffer.compile();
 

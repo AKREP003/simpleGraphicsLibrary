@@ -1,5 +1,5 @@
-use crate::graphics::{Compile, GraphicObjects, Surface, Transformation};
-use crate::transitions::{rotate_coordinate, Transformer};
+use crate::graphics::{Compile, GraphicObjects, Surface};
+use crate::transitions::{rotate_coordinate, Transformation, Transformer};
 use crate::TriGraphics::CartesianCoordinate;
 use crate::TriGraphics::TriObjects::*;
 
