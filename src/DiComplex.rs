@@ -3,10 +3,12 @@ use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::{graphics, transitions};
 use crate::graphics::{Compile, DiCoordinate, GraphicObjects, GraphicTriangle, Surface};
 use crate::graphics::GraphicObjects::Triangle;
-use crate::transitions::{Transformation, Transformer};
+use crate::render::Arche;
+use crate::render::Arche::Di;
+use crate::transitions::{di_to_tri, rotate_coordinate, Transformation, Transformer, tri_to_di};
 use crate::TriGraphics::CartesianCoordinate;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct ComplexTriangle {
 
     sub_triangles : [Option<GraphicTriangle>; 2],
@@ -46,8 +48,8 @@ impl ComplexTriangle {
        return buffer;
    }
 
-   pub fn into(self) -> ComplexObjects {
-       return CTriangle(self);
+   pub fn into(self) -> Arche {
+       return Di(CTriangle(self));
    }
 }
 
@@ -58,15 +60,17 @@ impl Compile for ComplexTriangle {
     }
 }
 
-impl Transformation<DiCoordinate> for ComplexTriangle {
-    fn rotate(&mut self, trans: Transformer, pivot: DiCoordinate) {
+impl Transformation<CartesianCoordinate> for ComplexTriangle {
+    fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
 
-        self = &mut ComplexTriangle::construct(&mut self.coords, self.sub_triangles[0].unwrap().surf.clone());
+        *self = ComplexTriangle::construct(&mut self.coords.map(|c| tri_to_di(rotate_coordinate(di_to_tri(c), trans, pivot))), self.sub_triangles[0].unwrap().surf.clone());
+
+
 
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct  Quadrangle {
 
     side : [ComplexTriangle; 2]
@@ -110,8 +114,8 @@ impl Quadrangle {
 
 }
 
-impl Transformation<DiCoordinate> for Quadrangle {
-    fn rotate(&mut self, trans: Transformer, pivot: DiCoordinate) {
+impl Transformation<CartesianCoordinate> for Quadrangle {
+    fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
 
         self.side.iter_mut().for_each(|x| x.rotate(trans, pivot));
 
@@ -132,7 +136,7 @@ impl Compile for Quadrangle {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum ComplexObjects {
 
     CTriangle(ComplexTriangle),
@@ -141,10 +145,12 @@ pub enum ComplexObjects {
 
     Polygon(u32, u32, DiCoordinate, Surface),
 
+    Null
+
 }
 
-impl Transformation<DiCoordinate> for ComplexObjects {
-    fn rotate(&mut self, trans: Transformer, pivot: DiCoordinate) {
+impl Transformation<CartesianCoordinate> for ComplexObjects {
+    fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
 
         match self {
             CTriangle(t) => {
@@ -160,6 +166,10 @@ impl Transformation<DiCoordinate> for ComplexObjects {
             ComplexObjects::Polygon(_, _, _, _) => {
                 panic!("don't")
             }
+
+            ComplexObjects::Null => {
+                panic!("don't")
+            }
         }
 
     }
@@ -168,6 +178,10 @@ impl Transformation<DiCoordinate> for ComplexObjects {
 impl Compile for ComplexObjects {
     fn compile(&self) -> Vec<GraphicObjects> {
         match self {
+
+            ComplexObjects::Null => {
+                return vec![];
+            }
 
             ComplexObjects::CTriangle(CompTriangle) => {
 

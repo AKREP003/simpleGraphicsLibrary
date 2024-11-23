@@ -34,7 +34,7 @@ unsafe extern "system" fn window_proc(
     w_param: WPARAM,
     l_param: LPARAM,
 ) -> LRESULT {
-    thread::sleep(Duration::from_millis(7)); //144 fps
+    thread::sleep(Duration::from_millis(15)); //144 fps
 
     match msg {
         WM_PAINT => {

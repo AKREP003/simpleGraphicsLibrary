@@ -6,7 +6,7 @@ use crate::TriGraphics::TriObjects::*;
 
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum TriComplexes {
 
     RectangularPrism(

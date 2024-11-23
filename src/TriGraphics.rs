@@ -15,7 +15,7 @@ fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
     (x as i32, y as i32, z as i32)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum TriObjects {
     TriLine(CartesianCoordinate, CartesianCoordinate, Colour),
     TriTriangle(CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, Surface),

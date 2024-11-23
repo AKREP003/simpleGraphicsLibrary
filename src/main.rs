@@ -29,21 +29,22 @@ use crate::TriGraphics::TriObjects;
 use crate::TriGraphics::TriObjects::TriLine;
 use lazy_static::lazy_static;
 use transitions::Transformation;
+use crate::render::Arche::Null;
+use crate::render::Arche;
 
 
 static mut init:bool = true;
 
-static degree:f64 = 45.0;
-
-lazy_static! {
-
-    static ref SHAPE:ComplexObjects = ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0)));
+static degree:f64 = 30.0;
 
 
-}
-static mut TRILINE:TriObjects = TriLine((WIDTH / 2 + 100, (HEIGHT / 2) + 100, 1), (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1), (100, 200, 0, 0));
-static mut TRITRIANGLE:TriObjects = TriObjects::TriTriangle((WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 100, 0), Flat((100, 200, 0, 0)));
-static mut TRIQUADRANGLE:TriObjects = TriObjects::TriQuadrangle((WIDTH / 2, HEIGHT / 2, 1), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 50, 1), (100 + (WIDTH / 2), (HEIGHT / 2) + 50, 1), Flat((100, 200, 0, 0)));
+
+static mut SHAPE:Arche = Null; //ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0))).into();
+
+
+//static mut TRILINE:TriObjects = TriLine((WIDTH / 2 + 100, (HEIGHT / 2) + 100, 1), (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1), (100, 200, 0, 0));
+//static mut TRITRIANGLE:TriObjects = TriObjects::TriTriangle((WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 100, 0), Flat((100, 200, 0, 0)));
+//static mut TRIQUADRANGLE:TriObjects = TriObjects::TriQuadrangle((WIDTH / 2, HEIGHT / 2, 1), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 50, 1), (100 + (WIDTH / 2), (HEIGHT / 2) + 50, 1), Flat((100, 200, 0, 0)));
 
 static mut cube : TriComplexes = RectangularPrism((100, 100, 100), (100, 100, 200), (100, 200, 100), (100, 200, 200), (200, 100, 100), (200, 100, 200), (200, 200, 100), (200, 200, 200), Flat((100, 200, 0, 0)));
 
@@ -56,23 +57,23 @@ unsafe fn oct() -> Option<State> {
 
     let now = Instant::now();
 
-    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(50) {
+    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(100) {
         return None
     } else { LAST_RUN_TIME = Some(now); }
 
     let r30: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64)) = (
-        (degree.cos(), 0.0, degree.sin()),
-        (0.0, 1.0, 0.0),
-        (-degree.sin(), 0.0, degree.cos())
+        (0.866, -0.5, 0.0),
+        (0.5, 0.866, 0.0),
+        (0.0, 0.0, 1.0)
     );
 
     init = false;
 
-    TRIQUADRANGLE.rotate(r30, (WIDTH / 2, (HEIGHT / 2), 1));
+    SHAPE.rotate(r30, (WIDTH / 2, (HEIGHT / 2), 0));
 
     Some(State {
         objects:vec![
-            Tri(TRIQUADRANGLE.clone())
+            SHAPE.clone()
         ],
         canvas:Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize])
     })
@@ -84,7 +85,10 @@ unsafe fn oct() -> Option<State> {
 fn main() {
 
 
+
     unsafe {
+        SHAPE = ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0))).into();
+
         LAST_RUN_TIME = Some(Instant::now());
 
         run_window(draw_gradient, oct);

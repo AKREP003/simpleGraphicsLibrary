@@ -26,7 +26,7 @@ pub type DiCoordinate = (i32, i32);
 
 fn indexify(c:&DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct GraphicTriangle {
 
     lines : [InfLine; 2],
@@ -110,7 +110,7 @@ impl Rend for GraphicTriangle {
 
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum GraphicObjects {
 
     Pixel(DiCoordinate, Colour),
