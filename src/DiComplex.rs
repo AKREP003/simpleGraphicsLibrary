@@ -46,6 +46,9 @@ impl ComplexTriangle {
        return buffer;
    }
 
+   pub fn into(self) -> ComplexObjects {
+       return CTriangle(self);
+   }
 }
 
 impl Compile for ComplexTriangle {
@@ -100,6 +103,11 @@ impl Quadrangle {
         });
 
     }
+
+    pub fn into(self) -> ComplexObjects {
+        return Qangle(self);
+    }
+
 }
 
 impl Transformation<DiCoordinate> for Quadrangle {
