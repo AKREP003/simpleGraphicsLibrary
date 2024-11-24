@@ -1,7 +1,10 @@
-use crate::graphics::{Colour, Compile, GraphicObjects, Surface};
+use crate::graphics::{Colour, Compile, DiCoordinate, GraphicObjects, Surface};
 use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::DiComplex::{ComplexTriangle, Quadrangle};
-use crate::transitions::{rotate_coordinate, Transformation, Transformer};
+use crate::render::Arche;
+use crate::render::Arche::Tri;
+use crate::transitions::{rotate_coordinate, Transformation, Transformer, tri_to_di};
+use crate::TriGraphics::TriObjects::{ TriTring};
 
 pub type SphericalCoordinate = (f32, f32, f32);
 pub type CartesianCoordinate = (i32, i32, i32);
@@ -16,10 +19,106 @@ fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
 }
 
 #[derive(Clone, Copy, Debug)]
+pub struct TriTriangle {
+
+    di : ComplexTriangle,
+    coords : [CartesianCoordinate; 3],
+    surface : Surface,
+
+}
+
+impl TriTriangle {
+
+    pub fn construct(coords: &mut [CartesianCoordinate; 3], surface: Surface) -> Self {
+
+        let mut buffer:[DiCoordinate; 3] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2])];
+
+        let di = ComplexTriangle::construct(&mut buffer, surface.clone());
+        let buffer = TriTriangle {
+            di,
+            coords: *coords,
+            surface,
+        };
+
+        return buffer;
+    }
+
+    pub fn into (&self) -> Arche {Tri(TriTring(*self))}
+
+}
+
+impl Compile for TriTriangle {
+    fn compile(&self) -> Vec<GraphicObjects> {
+        return self.di.compile();
+    }
+}
+
+impl Transformation<CartesianCoordinate> for TriTriangle {
+    fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
+        for i in 0..3 {
+            self.coords[i] = rotate_coordinate(self.coords[i], trans, pivot);
+        }
+        self.di = ComplexTriangle::construct(&mut [
+            tri_to_di(self.coords[0]),
+            tri_to_di(self.coords[1]),
+            tri_to_di(self.coords[2])
+        ], self.surface.clone());
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct TQuadrangle {
+    di : Quadrangle,
+    coords : [CartesianCoordinate; 4],
+    surface : Surface,
+}
+
+impl TQuadrangle {
+    pub fn construct(coords: &mut [CartesianCoordinate; 4], surface: Surface) -> Self {
+
+        let mut buffer:[DiCoordinate; 4] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2]), tri_to_di(coords[3])];
+
+        let di = Quadrangle::construct(&mut buffer, surface.clone());
+
+        let buffer = TQuadrangle {
+            di,
+            coords: *coords,
+            surface,
+        };
+
+        return buffer;
+    }
+
+    pub fn into (&self) -> Arche {Tri(TriObjects::TriQuadrangle(*self))}
+
+}
+
+impl Compile for TQuadrangle {
+    fn compile(&self) -> Vec<GraphicObjects> {
+
+        return self.di.compile();
+    }
+}
+
+impl Transformation<CartesianCoordinate> for TQuadrangle {
+    fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
+        for i in 0..4 {
+            self.coords[i] = rotate_coordinate(self.coords[i], trans, pivot);
+        }
+        self.di = Quadrangle::construct(&mut [
+            tri_to_di(self.coords[0]),
+            tri_to_di(self.coords[1]),
+            tri_to_di(self.coords[2]),
+            tri_to_di(self.coords[3])
+        ], self.surface.clone());
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub enum TriObjects {
     TriLine(CartesianCoordinate, CartesianCoordinate, Colour),
-    TriTriangle(CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, Surface),
-    TriQuadrangle(CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, CartesianCoordinate, Surface),
+    TriTring(TriTriangle),
+    TriQuadrangle(TQuadrangle),
 }
 
 
@@ -33,20 +132,15 @@ impl Compile for TriObjects {
 
             },
 
-            TriObjects::TriTriangle((x1, y1, _), (x2, y2, _), (x3, y3, _), c) => {
+            TriObjects::TriTring(t) => {
 
-                let buffer = ComplexTriangle::construct(&mut [(*x1, *y1), (*x2, *y2), (*x3, *y3)], (*c).clone());
-
-                return buffer.compile();
+                return t.compile();
 
             },
 
-            TriObjects::TriQuadrangle((x1, y1, _), (x2, y2, _), (x3, y3, _), (x4, y4, _), c) => {
-                let buffer = Quadrangle::construct(&mut [(*x1, *y1), (*x2, *y2), (*x3, *y3), (*x4, *y4)], (*c).clone());
+            TriObjects::TriQuadrangle(q) => {
 
-                let mut result = buffer.compile();
-
-                return result;
+                return q.compile();
             }
         }
 
@@ -62,19 +156,12 @@ impl Transformation<CartesianCoordinate> for TriObjects {
                 *y = rotate_coordinate(*y, trans, pivot);
             },
 
-            TriObjects::TriTriangle(x, y, z, _) => {
-                *x = rotate_coordinate(*x, trans, pivot);
-                *y = rotate_coordinate(*y, trans, pivot);
-                *z = rotate_coordinate(*z, trans, pivot);
+            TriObjects::TriTring(t) => {
+                t.rotate(trans, pivot)
             },
 
-            TriObjects::TriQuadrangle(x, y, z, w, _) => {
-                *x = rotate_coordinate(*x, trans, pivot);
-
-                *y = rotate_coordinate(*y, trans, pivot);
-
-                *z = rotate_coordinate(*z, trans, pivot);
-                *w = rotate_coordinate(*w, trans, pivot);
+            TriObjects::TriQuadrangle(q) => {
+                q.rotate(trans, pivot)
 
             }
         }

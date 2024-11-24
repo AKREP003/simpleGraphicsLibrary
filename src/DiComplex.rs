@@ -79,7 +79,7 @@ pub struct  Quadrangle {
 
 impl Quadrangle {
 
-    pub fn construct(coords : &mut [DiCoordinate; 4], surface : Surface) -> ComplexObjects {
+    pub fn construct(coords : &mut [DiCoordinate; 4], surface : Surface) -> Self {
 
         coords.sort_by(|a, b| (a.0).cmp(&b.0));
 
@@ -92,7 +92,7 @@ impl Quadrangle {
         grouping.0.sort_by(|a, b| (a.1).cmp(&b.1));
         grouping.1.sort_by(|a, b| (a.1).cmp(&b.1));
 
-        return Qangle(Quadrangle {
+        return Quadrangle {
 
             side: [
                  ComplexTriangle::construct(&mut [
@@ -104,7 +104,7 @@ impl Quadrangle {
                     grouping.0.get(1).unwrap().clone(),
                     grouping.1.get(0).unwrap().clone()], surface.clone()))
             ]
-        });
+        };
 
     }
 

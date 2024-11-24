@@ -23,7 +23,7 @@ pub fn matrix_sub((x1, y1, z1) : CartesianCoordinate, (x2, y2, z2) : CartesianCo
 
 pub fn matrix_add((x1, y1, z1) : CartesianCoordinate, (x2, y2, z2) : CartesianCoordinate) -> CartesianCoordinate {(x1 + x2, y1 + y2, z1 + z2)}
 
-pub fn rotate_coordinate(x:CartesianCoordinate, t_matrix:Transformer, pivot:CartesianCoordinate) -> CartesianCoordinate {
+pub fn rotate_coordinate(x:CartesianCoordinate, t_matrix:Transformer, pivot:CartesianCoordinate) -> CartesianCoordinate { //todo optimize every function that doesnt take ref
 
     matrix_add(pivot, matrix_mult(matrix_sub(x, pivot.clone() ), t_matrix) )
 
