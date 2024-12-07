@@ -23,9 +23,9 @@ use DiComplex::ComplexObjects::{CTriangle, Polygon, Qangle};
 use crate::DiComplex::ComplexTriangle;
 use crate::graphics::Surface::Flat;
 use crate::render::Arche::{Di, Tri, TriC};
-use crate::TriComplex::TriComplexes;
+use crate::TriComplex::{Rectprism, TriComplexes};
 use crate::TriComplex::TriComplexes::RectangularPrism;
-use crate::TriGraphics::TriObjects;
+use crate::TriGraphics::{TriObjects, TriQuadrangle, TriTriangle};
 use crate::TriGraphics::TriObjects::TriLine;
 use lazy_static::lazy_static;
 use transitions::Transformation;
@@ -46,10 +46,11 @@ static mut SHAPE:Arche = Null; //ComplexTriangle::construct(&mut [(WIDTH / 2, HE
 //static mut TRITRIANGLE:TriObjects = TriObjects::TriTriangle((WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 100, 0), Flat((100, 200, 0, 0)));
 //static mut TRIQUADRANGLE:TriObjects = TriObjects::TriQuadrangle((WIDTH / 2, HEIGHT / 2, 1), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 50, 1), (100 + (WIDTH / 2), (HEIGHT / 2) + 50, 1), Flat((100, 200, 0, 0)));
 
-static mut cube : TriComplexes = RectangularPrism((100, 100, 100), (100, 100, 200), (100, 200, 100), (100, 200, 200), (200, 100, 100), (200, 100, 200), (200, 200, 100), (200, 200, 200), Flat((100, 200, 0, 0)));
 
 static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
 // todo: https://en.wikipedia.org/wiki/3D_projection
+
+
 
 unsafe fn oct() -> Option<State> {
 
@@ -62,14 +63,14 @@ unsafe fn oct() -> Option<State> {
     } else { LAST_RUN_TIME = Some(now); }
 
     let r30: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64)) = (
-        (0.866, -0.5, 0.0),
-        (0.5, 0.866, 0.0),
-        (0.0, 0.0, 1.0)
+        (degree.cos(), 0.0, degree.sin()),
+        (0.0, 1.0, 0.0),
+        (-degree.sin(), 0.0, degree.cos())
     );
 
     init = false;
 
-    SHAPE.rotate(r30, (WIDTH / 2, (HEIGHT / 2), 0));
+    SHAPE.rotate(r30, (WIDTH / 2, HEIGHT / 2, 100));
 
     Some(State {
         objects:vec![
@@ -84,10 +85,17 @@ unsafe fn oct() -> Option<State> {
 
 fn main() {
 
-
+    let colors = [
+        Flat((100, 200, 0, 0)),
+        Flat((0, 200, 0, 0)),
+             Flat((0, 0, 200, 0)),
+                  Flat((0, 100, 200, 0)),
+                       Flat((100, 0, 100, 0)),
+                            Flat((100, 100, 100, 0)),
+    ];
 
     unsafe {
-        SHAPE = ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0))).into();
+        SHAPE = TriTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 0), (WIDTH / 2, (HEIGHT / 2) + 100, 0)], Flat((100, 200, 0, 0))).into(); //Rectprism::construct((WIDTH / 2, HEIGHT / 2, 100), [100, 100, 100],colors).into_arche();
 
         LAST_RUN_TIME = Some(Instant::now());
 

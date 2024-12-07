@@ -43,8 +43,6 @@ impl TriTriangle {
         return buffer;
     }
 
-    pub fn into (&self) -> Arche {Tri(TriTring(*self))}
-
 }
 
 impl Compile for TriTriangle {
@@ -67,20 +65,20 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct TQuadrangle {
+pub struct TriQuadrangle {
     di : Quadrangle,
     coords : [CartesianCoordinate; 4],
     surface : Surface,
 }
 
-impl TQuadrangle {
+impl TriQuadrangle {
     pub fn construct(coords: &mut [CartesianCoordinate; 4], surface: Surface) -> Self {
 
         let mut buffer:[DiCoordinate; 4] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2]), tri_to_di(coords[3])];
 
         let di = Quadrangle::construct(&mut buffer, surface.clone());
 
-        let buffer = TQuadrangle {
+        let buffer = TriQuadrangle {
             di,
             coords: *coords,
             surface,
@@ -89,18 +87,16 @@ impl TQuadrangle {
         return buffer;
     }
 
-    pub fn into (&self) -> Arche {Tri(TriObjects::TriQuadrangle(*self))}
-
 }
 
-impl Compile for TQuadrangle {
+impl Compile for TriQuadrangle {
     fn compile(&self) -> Vec<GraphicObjects> {
 
         return self.di.compile();
     }
 }
 
-impl Transformation<CartesianCoordinate> for TQuadrangle {
+impl Transformation<CartesianCoordinate> for TriQuadrangle {
     fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
         for i in 0..4 {
             self.coords[i] = rotate_coordinate(self.coords[i], trans, pivot);
@@ -118,7 +114,7 @@ impl Transformation<CartesianCoordinate> for TQuadrangle {
 pub enum TriObjects {
     TriLine(CartesianCoordinate, CartesianCoordinate, Colour),
     TriTring(TriTriangle),
-    TriQuadrangle(TQuadrangle),
+    TriQuad(TriQuadrangle),
 }
 
 
@@ -138,7 +134,7 @@ impl Compile for TriObjects {
 
             },
 
-            TriObjects::TriQuadrangle(q) => {
+            TriObjects::TriQuad(q) => {
 
                 return q.compile();
             }
@@ -160,7 +156,7 @@ impl Transformation<CartesianCoordinate> for TriObjects {
                 t.rotate(trans, pivot)
             },
 
-            TriObjects::TriQuadrangle(q) => {
+            TriObjects::TriQuad(q) => {
                 q.rotate(trans, pivot)
 
             }

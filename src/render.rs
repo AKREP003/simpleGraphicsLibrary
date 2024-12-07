@@ -2,13 +2,15 @@
 use crate::{HEIGHT, WIDTH};
 use crate::graphics::{GraphicObjects, Rend, Visual};
 use std::thread;
-use crate::DiComplex::ComplexObjects;
+use crate::DiComplex::{ComplexObjects, ComplexTriangle, Quadrangle};
 use crate::DiComplex::ComplexObjects::Polygon;
 use crate::graphics::Surface::Flat;
 use crate::graphics::Compile;
+use crate::render::Arche::Tri;
 use crate::transitions::{Transformation, Transformer};
-use crate::TriComplex::TriComplexes;
-use crate::TriGraphics::{CartesianCoordinate, TriObjects};
+use crate::TriComplex::{Rectprism, TriComplexes};
+use crate::TriGraphics::{CartesianCoordinate, TriObjects, TriQuadrangle, TriTriangle};
+use crate::TriGraphics::TriObjects::TriTring;
 
 pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
 
@@ -49,6 +51,36 @@ pub enum Arche {
     Graphic(GraphicObjects),
     Null
 
+}
+
+impl From<TriTriangle> for Arche {
+    fn from(value: TriTriangle) -> Self {
+        Tri(TriTring(value))
+    }
+}
+
+impl From<ComplexTriangle> for Arche {
+    fn from(value: ComplexTriangle) -> Self {
+        Arche::Di(ComplexObjects::CTriangle(value))
+    }
+}
+
+impl From<Quadrangle> for Arche {
+    fn from(value: Quadrangle) -> Self {
+        Arche::Di(ComplexObjects::Qangle(value))
+    }
+}
+
+impl From<TriQuadrangle> for Arche{
+    fn from(value: TriQuadrangle) -> Self {
+        Arche::Tri(TriObjects::TriQuad(value))
+    }
+}
+
+impl From<Rectprism> for Arche {
+    fn from(value: Rectprism) -> Self {
+        Arche::TriC(TriComplexes::RectangularPrism(value))
+    }
 }
 
 impl Compile for Arche {

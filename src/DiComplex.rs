@@ -48,9 +48,6 @@ impl ComplexTriangle {
        return buffer;
    }
 
-   pub fn into(self) -> Arche {
-       return Di(CTriangle(self));
-   }
 }
 
 impl Compile for ComplexTriangle {
@@ -108,9 +105,6 @@ impl Quadrangle {
 
     }
 
-    pub fn into(self) -> ComplexObjects {
-        return Qangle(self);
-    }
 
 }
 
@@ -147,6 +141,18 @@ pub enum ComplexObjects {
 
     Null
 
+}
+
+impl From<ComplexTriangle> for ComplexObjects {
+    fn from(value: ComplexTriangle) -> Self {
+        return CTriangle(value);
+    }
+}
+
+impl From<Quadrangle> for ComplexObjects {
+    fn from(value: Quadrangle) -> Self {
+        return Qangle(value);
+    }
 }
 
 impl Transformation<CartesianCoordinate> for ComplexObjects {
