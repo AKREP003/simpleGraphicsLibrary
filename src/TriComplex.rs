@@ -16,7 +16,9 @@ pub struct Rectprism {
 
     sides : [TriQuadrangle; 6],
 
-    surfaces : [Surface; 6]
+    surfaces : [Surface; 6],
+
+    pub center : CartesianCoordinate
 
 }
 impl Rectprism {
@@ -103,11 +105,41 @@ impl Rectprism {
         // Sort sides by their z-center values
         sides.sort_by(|s1, s2| s2.get_center().2.partial_cmp(&s1.get_center().2).expect("eee"));
 
+        let mut x:f64 = 0.0;
+        let mut y:f64 = 0.0;
+        let mut z:f64 = 0.0;
 
-        Rectprism { sides, surfaces }
+        corners.iter().for_each(|d| //there is a faster way to do it
+            {
+                y += (d.1 as f64 / 4.0);
+                x += (d.0 as f64/ 4.0);
+                z += (d.2 as f64/ 4.0);
+            }
+        );
+
+        Rectprism { sides, surfaces, center : (x, y, z)}
     }
 
+    pub fn get_center(&self) -> CartesianCoordinate {
+        let mut x:f64 = 0.0;
+        let mut y:f64 = 0.0;
+        let mut z:f64 = 0.0;
 
+        self.sides.iter().for_each(|d|
+            {
+
+                let cent = d.get_center();
+
+                y += (cent.1 as f64 / 6.0);
+                x += (cent.0 as f64/ 6.0);
+                z += (cent.2 as f64/ 6.0);
+            }
+        );
+
+
+        (x, y,  z)
+
+    }
 
 
 }
@@ -136,6 +168,8 @@ impl Transformation<CartesianCoordinate> for Rectprism {
         }
 
         self.sides.sort_by(|s1, s2| s2.get_center().2.partial_cmp(&s1.get_center().2).expect("eee"));
+
+        self.center  = self.get_center();
 
     }
 }

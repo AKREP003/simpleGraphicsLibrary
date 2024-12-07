@@ -67,7 +67,11 @@ unsafe fn oct() -> Option<State> {
 
     init = false;
 
-    SHAPE.rotate(r30, ((WIDTH / 2).into(), (HEIGHT / 2).into(), 100.0));
+    let mut piv = (0.0,0.0,0.0);
+
+    if let Arche::TriC(tri) = &SHAPE { if let TriComplexes::RectangularPrism(prism) = &tri {piv = prism.center}};
+
+    SHAPE.rotate(r30, piv);
 
     Some(State {
         objects:vec![
@@ -92,7 +96,7 @@ fn main() {
     ];
 
     unsafe {
-        SHAPE = Rectprism::construct(((WIDTH / 2).into(), (HEIGHT / 2).into(), 100.0), [100.0, 100.0, 100.0],colors).into();
+        SHAPE = Rectprism::construct((((WIDTH / 2) - 75).into(), ((HEIGHT / 2) - 25).into(), 100.0), [100.0, 100.0, 100.0],colors).into();
 
         LAST_RUN_TIME = Some(Instant::now());
 
