@@ -24,6 +24,7 @@ pub struct TriTriangle {
     di : ComplexTriangle,
     coords : [CartesianCoordinate; 3],
     surface : Surface,
+    pub center : CartesianCoordinate,
 
 }
 
@@ -34,13 +35,34 @@ impl TriTriangle {
         let mut buffer:[DiCoordinate; 3] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2])];
 
         let di = ComplexTriangle::construct(&mut buffer, surface.clone());
-        let buffer = TriTriangle {
+        let mut buffer = TriTriangle {
             di,
             coords: *coords,
             surface,
+            center : (0,0,0),
         };
 
+        buffer.center = buffer.get_center();
+
         return buffer;
+    }
+
+    pub fn get_center(&self) -> CartesianCoordinate {
+        let mut x:f32 = 0.0;
+        let mut y:f32 = 0.0;
+        let mut z:f32 = 0.0;
+
+        self.coords.iter().for_each(|d|
+            {
+                y += (d.1 as f32 / 3.0);
+                x += (d.0 as f32/ 3.0);
+                z += (d.2 as f32/ 3.0);
+            }
+        );
+
+
+        (x.round() as i32, y.round() as i32,  z.round() as i32)
+
     }
 
 }
@@ -61,6 +83,9 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
             tri_to_di(self.coords[1]),
             tri_to_di(self.coords[2])
         ], self.surface.clone());
+
+        self.center = self.get_center();
+
     }
 }
 
@@ -69,6 +94,7 @@ pub struct TriQuadrangle {
     di : Quadrangle,
     coords : [CartesianCoordinate; 4],
     surface : Surface,
+    center : CartesianCoordinate,
 }
 
 impl TriQuadrangle {
@@ -78,13 +104,33 @@ impl TriQuadrangle {
 
         let di = Quadrangle::construct(&mut buffer, surface.clone());
 
-        let buffer = TriQuadrangle {
+        let mut buffer = TriQuadrangle {
             di,
             coords: *coords,
             surface,
+            center : (0, 0, 0),
         };
+        buffer.center = buffer.get_center();
 
         return buffer;
+    }
+
+    pub fn get_center(&self) -> CartesianCoordinate {
+        let mut x:f32 = 0.0;
+        let mut y:f32 = 0.0;
+        let mut z:f32 = 0.0;
+
+        self.coords.iter().for_each(|d|
+            {
+                y += (d.1 as f32 / 4.0);
+                x += (d.0 as f32/ 4.0);
+                z += (d.2 as f32/ 4.0);
+            }
+        );
+
+
+        (x.round() as i32, y.round() as i32,  z.round() as i32)
+
     }
 
 }
@@ -107,6 +153,7 @@ impl Transformation<CartesianCoordinate> for TriQuadrangle {
             tri_to_di(self.coords[2]),
             tri_to_di(self.coords[3])
         ], self.surface.clone());
+        self.center = self.get_center();
     }
 }
 
