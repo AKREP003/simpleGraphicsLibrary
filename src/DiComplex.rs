@@ -15,6 +15,8 @@ pub struct ComplexTriangle {
 
     coords : [DiCoordinate; 3],
 
+    pub center : DiCoordinate
+
 }
 
 
@@ -22,9 +24,20 @@ impl ComplexTriangle {
 
    pub fn construct(coords : &mut [DiCoordinate; 3], surface : Surface) -> ComplexTriangle{
 
+       let mut x:f32 = 0.0;
+       let mut y:f32 = 0.0;
+
+       coords.iter().for_each(|d|
+           {
+               y += (d.1 as f32 / 3.0);
+               x += (d.0 as f32/ 3.0);
+           }
+       );
+
        let mut buffer = ComplexTriangle {
            sub_triangles: [None, None],
-            coords : *coords
+           coords : *coords,
+           center : (x.round() as i32, y.round() as i32)
        };
 
        coords.sort_by(|a, b| (a.0).cmp(&b.0));
@@ -48,6 +61,21 @@ impl ComplexTriangle {
        return buffer;
    }
 
+    pub fn get_center(&self) -> DiCoordinate {
+        let mut x:f32 = 0.0;
+        let mut y:f32 = 0.0;
+
+        self.coords.iter().for_each(|d|
+            {
+                y += (d.1 as f32 / 3.0);
+                x += (d.0 as f32/ 3.0);
+            }
+        );
+
+
+        (x.round() as i32, y.round() as i32)
+
+    }
 }
 
 impl Compile for ComplexTriangle {
@@ -62,7 +90,7 @@ impl Transformation<CartesianCoordinate> for ComplexTriangle {
 
         *self = ComplexTriangle::construct(&mut self.coords.map(|c| tri_to_di(rotate_coordinate(di_to_tri(c), trans, pivot))), self.sub_triangles[0].unwrap().surf.clone());
 
-
+        self.center = self.get_center();
 
     }
 }
@@ -70,7 +98,9 @@ impl Transformation<CartesianCoordinate> for ComplexTriangle {
 #[derive(Clone, Debug, Copy)]
 pub struct  Quadrangle {
 
-    side : [ComplexTriangle; 2]
+    side : [ComplexTriangle; 2],
+
+    pub center : DiCoordinate
 
 }
 
@@ -89,7 +119,11 @@ impl Quadrangle {
         grouping.0.sort_by(|a, b| (a.1).cmp(&b.1));
         grouping.1.sort_by(|a, b| (a.1).cmp(&b.1));
 
-        return Quadrangle {
+        let mut x:f32 = 0.0;
+        let mut y:f32 = 0.0;
+
+
+        let mut buffer = Quadrangle {
 
             side: [
                  ComplexTriangle::construct(&mut [
@@ -100,11 +134,32 @@ impl Quadrangle {
                     grouping.1.get(1).unwrap().clone(),
                     grouping.0.get(1).unwrap().clone(),
                     grouping.1.get(0).unwrap().clone()], surface.clone()))
-            ]
+            ],
+
+            center : (0,0)
         };
+
+        buffer.center = buffer.get_center();
+
+        buffer
 
     }
 
+    pub fn get_center(&self) -> DiCoordinate {
+        let mut x:f32 = 0.0;
+        let mut y:f32 = 0.0;
+
+        self.side.iter().map(|s| s.get_center()).for_each(|d|
+            {
+                y += (d.1 as f32 / 2.0);
+                x += (d.0 as f32/ 2.0);
+            }
+        );
+
+
+        (x.round() as i32, y.round() as i32)
+
+    }
 
 }
 
@@ -112,7 +167,7 @@ impl Transformation<CartesianCoordinate> for Quadrangle {
     fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
 
         self.side.iter_mut().for_each(|x| x.rotate(trans, pivot));
-
+        self.center = self.get_center();
     }
 }
 

@@ -107,9 +107,6 @@ impl Rend for GraphicTriangle {
     }
 }
 
-
-
-
 #[derive(Clone, Debug, Copy)]
 pub enum GraphicObjects {
 
@@ -120,6 +117,12 @@ pub enum GraphicObjects {
     Triangle(GraphicTriangle),
 
 
+}
+
+impl From<GraphicTriangle> for GraphicObjects {
+    fn from(value: GraphicTriangle) -> Self {
+        Triangle(value)
+    }
 }
 
 impl Rend for GraphicObjects {
@@ -211,9 +214,7 @@ pub  fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLin
     let dx = p2.0 - p1.0;
     let dy = p2.1 - p1.1;
 
-    if dx == 0 {
-        return None;
-    }
+    //RIP The Slope Checker
 
     let slope = dy as f32 / dx as f32;
 

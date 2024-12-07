@@ -95,7 +95,7 @@ fn main() {
     ];
 
     unsafe {
-        SHAPE = TriTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 0), (WIDTH / 2, (HEIGHT / 2) + 100, 0)], Flat((100, 200, 0, 0))).into(); //Rectprism::construct((WIDTH / 2, HEIGHT / 2, 100), [100, 100, 100],colors).into_arche();
+        SHAPE = Rectprism::construct((WIDTH / 2, HEIGHT / 2, 100), [100, 100, 100],colors).into();
 
         LAST_RUN_TIME = Some(Instant::now());
 
