@@ -23,7 +23,7 @@ impl Rectprism {
 
     pub fn construct(
         pivot: CartesianCoordinate,
-        dimensions: [i32; 3],
+        dimensions: [f64; 3],
         surfaces: [Surface; 6],
     ) -> Rectprism {
         let mut corners: [CartesianCoordinate; 8] = [
@@ -101,7 +101,7 @@ impl Rectprism {
 
 
         // Sort sides by their z-center values
-        sides.sort_by(|s1, s2| s2.get_center().2.cmp(&s1.get_center().2));
+        sides.sort_by(|s1, s2| s2.get_center().2.partial_cmp(&s1.get_center().2).expect("eee"));
 
 
         Rectprism { sides, surfaces }
@@ -135,7 +135,7 @@ impl Transformation<CartesianCoordinate> for Rectprism {
 
         }
 
-        self.sides.sort_by(|s1, s2| s2.get_center().2.cmp(&s1.get_center().2));
+        self.sides.sort_by(|s1, s2| s2.get_center().2.partial_cmp(&s1.get_center().2).expect("eee"));
 
     }
 }

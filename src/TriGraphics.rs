@@ -7,7 +7,7 @@ use crate::transitions::{rotate_coordinate, Transformation, Transformer, tri_to_
 use crate::TriGraphics::TriObjects::{ TriTring};
 
 pub type SphericalCoordinate = (f32, f32, f32);
-pub type CartesianCoordinate = (i32, i32, i32);
+pub type CartesianCoordinate = (f64, f64, f64);
 
 
 fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
@@ -15,7 +15,7 @@ fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
     let x = r * theta.cos() * phi.sin();
     let y = r * theta.sin() * phi.sin();
     let z = r * phi.cos();
-    (x as i32, y as i32, z as i32)
+    (x.into() , y.into() , z.into() )
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -39,7 +39,7 @@ impl TriTriangle {
             di,
             coords: *coords,
             surface,
-            center : (0,0,0),
+            center : (0.0,0.0,0.0),
         };
 
         buffer.center = buffer.get_center();
@@ -48,20 +48,20 @@ impl TriTriangle {
     }
 
     pub fn get_center(&self) -> CartesianCoordinate {
-        let mut x:f32 = 0.0;
-        let mut y:f32 = 0.0;
-        let mut z:f32 = 0.0;
+        let mut x:f64 = 0.0;
+        let mut y:f64 = 0.0;
+        let mut z:f64 = 0.0;
 
         self.coords.iter().for_each(|d|
             {
-                y += (d.1 as f32 / 3.0);
-                x += (d.0 as f32/ 3.0);
-                z += (d.2 as f32/ 3.0);
+                y += (d.1 as f64 / 3.0);
+                x += (d.0 as f64/ 3.0);
+                z += (d.2 as f64/ 3.0);
             }
         );
 
 
-        (x.round() as i32, y.round() as i32,  z.round() as i32)
+        (x, y,  z)
 
     }
 
@@ -108,7 +108,7 @@ impl TriQuadrangle {
             di,
             coords: *coords,
             surface,
-            center : (0, 0, 0),
+            center : (0.0, 0.0, 0.0),
         };
         buffer.center = buffer.get_center();
 
@@ -116,20 +116,20 @@ impl TriQuadrangle {
     }
 
     pub fn get_center(&self) -> CartesianCoordinate {
-        let mut x:f32 = 0.0;
-        let mut y:f32 = 0.0;
-        let mut z:f32 = 0.0;
+        let mut x:f64 = 0.0;
+        let mut y:f64 = 0.0;
+        let mut z:f64 = 0.0;
 
         self.coords.iter().for_each(|d|
             {
-                y += (d.1 as f32 / 4.0);
-                x += (d.0 as f32/ 4.0);
-                z += (d.2 as f32/ 4.0);
+                y += (d.1 as f64 / 4.0);
+                x += (d.0 as f64/ 4.0);
+                z += (d.2 as f64/ 4.0);
             }
         );
 
 
-        (x.round() as i32, y.round() as i32,  z.round() as i32)
+        (x, y,  z)
 
     }
 
@@ -171,7 +171,7 @@ impl Compile for TriObjects {
         match self {
             TriObjects::TriLine((x1,y1 , _), (x2,y2 , _), c) => {
 
-                vec![GraphicObjects::Line((*x1, *y1), (*x2, *y2), *c)]
+                vec![GraphicObjects::Line((x1.round() as i32, y1.round() as i32), (x2.round() as i32, y2.round() as i32), *c)]
 
             },
 

@@ -63,11 +63,11 @@ unsafe fn oct() -> Option<State> {
         return None
     } else { LAST_RUN_TIME = Some(now); }
 
-    let r30: Transformer = from_angles(5.0, 5.0,5.0);
+    let r30: Transformer = from_angles(-5.0, -2.0,5.0);
 
     init = false;
 
-    SHAPE.rotate(r30, (WIDTH / 2, HEIGHT / 2, 100));
+    SHAPE.rotate(r30, ((WIDTH / 2).into(), (HEIGHT / 2).into(), 100.0));
 
     Some(State {
         objects:vec![
@@ -92,7 +92,7 @@ fn main() {
     ];
 
     unsafe {
-        SHAPE = Rectprism::construct((WIDTH / 2, HEIGHT / 2, 100), [100, 100, 100],colors).into();
+        SHAPE = Rectprism::construct(((WIDTH / 2).into(), (HEIGHT / 2).into(), 100.0), [100.0, 100.0, 100.0],colors).into();
 
         LAST_RUN_TIME = Some(Instant::now());
 
