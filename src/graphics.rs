@@ -223,16 +223,53 @@ pub  fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLin
     Some((slope, intercept))
 }
 
+fn alpha_blend(foreground: (u8, u8, u8, u8), background: (u8, u8, u8, u8)) -> (u8, u8, u8, u8) {
+    let fg_alpha = foreground.3 as f64 / 255.0; // Foreground alpha normalized to [0, 1]
+    let bg_alpha = background.3 as f64 / 255.0; // Background alpha normalized to [0, 1]
+
+    // Composite alpha
+    let out_alpha = fg_alpha + bg_alpha * (1.0 - fg_alpha);
+
+    if out_alpha == 0.0 {
+        return (0, 0, 0, 0); // Fully transparent
+    }
+
+    // Blend each channel
+    let blend_channel = |fg: u8, bg: u8| {
+        ((fg as f64 * fg_alpha + bg as f64 * bg_alpha * (1.0 - fg_alpha)) / out_alpha).round() as u8
+    };
+
+    let r = blend_channel(foreground.0, background.0);
+    let g = blend_channel(foreground.1, background.1);
+    let b = blend_channel(foreground.2, background.2);
+
+    // Return the blended color
+    (
+        r,
+        g,
+        b,
+        (out_alpha * 255.0).round() as u8, // Convert output alpha back to [0, 255]
+    )
+}
+
 fn paint_it(rendered : &mut Visual, surface : Surface, cord : &DiCoordinate) {
 
     let index = indexify(cord);
 
     match surface {
         Flat(colour) => {
-            rendered[index] = colour.0;
-            rendered[index + 1] = colour.1;
-            rendered[index + 2] = colour.2;
-            rendered[index + 3] = colour.3;
+
+            let updated = alpha_blend(colour,
+                                      (
+                                          rendered[index],
+                                          rendered[index + 1],
+                                          rendered[index + 2],
+                                          rendered[index + 3],));
+
+            rendered[index] = updated.0;
+            rendered[index + 1] = updated.1;
+            rendered[index + 2] = updated.2;
+            rendered[index + 3] = updated.3;
         }
     }
 
