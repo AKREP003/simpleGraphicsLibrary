@@ -21,13 +21,12 @@ pub struct Rectprism {
 }
 impl Rectprism {
 
-    pub fn construct(pivot : CartesianCoordinate, dimensions : [i32; 3], surfaces :  [Surface; 6]) -> Rectprism {
-
-        let mut dummy = [(0,0,0), (1,1,1), (2,2,2), (3,3,3)];
-
-        let mut sides : [TriQuadrangle; 6] = [TriQuadrangle::construct(&mut dummy, surfaces[0]); 6];
-
-        let mut corners : [CartesianCoordinate; 8] = [
+    pub fn construct(
+        pivot: CartesianCoordinate,
+        dimensions: [i32; 3],
+        surfaces: [Surface; 6],
+    ) -> Rectprism {
+        let mut corners: [CartesianCoordinate; 8] = [
             pivot.clone(),
             (pivot.0 + dimensions[0], pivot.1, pivot.2),
             (pivot.0, pivot.1 + dimensions[1], pivot.2),
@@ -35,25 +34,79 @@ impl Rectprism {
             (pivot.0, pivot.1, pivot.2 + dimensions[2]),
             (pivot.0 + dimensions[0], pivot.1, pivot.2 + dimensions[2]),
             (pivot.0, pivot.1 + dimensions[1], pivot.2 + dimensions[2]),
-            (pivot.0 + dimensions[0], pivot.1 + dimensions[1], pivot.2 + dimensions[2])
+            (
+                pivot.0 + dimensions[0],
+                pivot.1 + dimensions[1],
+                pivot.2 + dimensions[2],
+            ),
+        ];
+
+        // Initialize sides array with dummy values
+        let mut sides: [TriQuadrangle; 6] = [
+            TriQuadrangle::construct(
+                &mut [
+                    corners[0],
+                    corners[1],
+                    corners[4],
+                    corners[5],
+                ],
+                surfaces[0],
+            ),
+            TriQuadrangle::construct(
+                &mut [
+                    corners[1],
+                    corners[3],
+                    corners[5],
+                    corners[7],
+                ],
+                surfaces[1],
+            ),
+            TriQuadrangle::construct(
+                &mut [
+                    corners[3],
+                    corners[2],
+                    corners[7],
+                    corners[6],
+                ],
+                surfaces[2],
+            ),
+            TriQuadrangle::construct(
+                &mut [
+                    corners[2],
+                    corners[0],
+                    corners[6],
+                    corners[4],
+                ],
+                surfaces[3],
+            ),
+            TriQuadrangle::construct(
+                &mut [
+                    corners[0],
+                    corners[1],
+                    corners[2],
+                    corners[3],
+                ],
+                surfaces[4],
+            ),
+            TriQuadrangle::construct(
+                &mut [
+                    corners[4],
+                    corners[5],
+                    corners[6],
+                    corners[7],
+                ],
+                surfaces[5],
+            ),
         ];
 
 
-        for i in 0..6 {
+        // Sort sides by their z-center values
+        sides.sort_by(|s1, s2| s2.get_center().2.cmp(&s1.get_center().2));
 
-            sides[i] = TriQuadrangle::construct(
-                &mut [corners[i],
-                corners[(i + 1) % 4],
-                corners[(i + 2) % 4 + 4],
-                corners[(i + 3) % 4 + 4]],
-                surfaces[i]
-            );
 
-        }
-
-        return Rectprism { sides, surfaces };
-
+        Rectprism { sides, surfaces }
     }
+
 
 
 
@@ -82,7 +135,7 @@ impl Transformation<CartesianCoordinate> for Rectprism {
 
         }
 
-
+        self.sides.sort_by(|s1, s2| s2.get_center().2.cmp(&s1.get_center().2));
 
     }
 }

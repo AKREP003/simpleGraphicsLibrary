@@ -31,6 +31,7 @@ use lazy_static::lazy_static;
 use transitions::Transformation;
 use crate::render::Arche::Null;
 use crate::render::Arche;
+use crate::transitions::{from_angles, Transformer};
 
 
 static mut init:bool = true;
@@ -58,15 +59,11 @@ unsafe fn oct() -> Option<State> {
 
     let now = Instant::now();
 
-    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(100) {
+    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(7) {
         return None
     } else { LAST_RUN_TIME = Some(now); }
 
-    let r30: ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64)) = (
-        (degree.cos(), 0.0, degree.sin()),
-        (0.0, 1.0, 0.0),
-        (-degree.sin(), 0.0, degree.cos())
-    );
+    let r30: Transformer = from_angles(5.0, 5.0,5.0);
 
     init = false;
 

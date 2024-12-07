@@ -1,5 +1,42 @@
+use std::f64::consts::PI;
 use crate::graphics::DiCoordinate;
 use crate::TriGraphics::CartesianCoordinate;
+
+
+pub fn from_angles(x_angle: f64, y_angle: f64, z_angle: f64) -> Transformer {
+    // Convert degrees to radians
+    let (x_rad, y_rad, z_rad) = (
+        x_angle * PI / 180.0,
+        y_angle * PI / 180.0,
+        z_angle * PI / 180.0,
+    );
+
+    // Precompute sines and cosines
+    let (sin_x, cos_x) = (x_rad.sin(), x_rad.cos());
+    let (sin_y, cos_y) = (y_rad.sin(), y_rad.cos());
+    let (sin_z, cos_z) = (z_rad.sin(), z_rad.cos());
+
+    // Compute combined rotation matrix
+    let m00 = cos_y * cos_z;
+    let m01 = cos_y * sin_z;
+    let m02 = -sin_y;
+
+    let m10 = sin_x * sin_y * cos_z - cos_x * sin_z;
+    let m11 = sin_x * sin_y * sin_z + cos_x * cos_z;
+    let m12 = sin_x * cos_y;
+
+    let m20 = cos_x * sin_y * cos_z + sin_x * sin_z;
+    let m21 = cos_x * sin_y * sin_z - sin_x * cos_z;
+    let m22 = cos_x * cos_y;
+
+    (
+        (m00, m01, m02),
+        (m10, m11, m12),
+        (m20, m21, m22),
+    )
+}
+
+
 
 pub(crate) type Transformer = ((f64, f64, f64), (f64, f64, f64), (f64, f64, f64));
 
@@ -9,9 +46,9 @@ pub fn matrix_mult(
 ) -> (i32, i32, i32) {
 
      (
-        (vector.0 as f64 * matrix.0 .0 + vector.1 as f64 * matrix.1 .0 + vector.2 as f64 * matrix.2 .0).ceil() as i32,
-        (vector.0 as f64 * matrix.0 .1 + vector.1 as f64 * matrix.1 .1 + vector.2 as f64 * matrix.2 .1).ceil() as i32,
-        (vector.0 as f64* matrix.0 .2 + vector.1 as f64 * matrix.1 .2 + vector.2 as f64 * matrix.2 .2).ceil() as i32,
+        (vector.0 as f64 * matrix.0 .0 + vector.1 as f64 * matrix.1 .0 + vector.2 as f64 * matrix.2 .0).round() as i32,
+        (vector.0 as f64 * matrix.0 .1 + vector.1 as f64 * matrix.1 .1 + vector.2 as f64 * matrix.2 .1).round() as i32,
+        (vector.0 as f64* matrix.0 .2 + vector.1 as f64 * matrix.1 .2 + vector.2 as f64 * matrix.2 .2).round() as i32,
     )
 }
 
