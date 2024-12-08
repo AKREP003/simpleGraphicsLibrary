@@ -80,11 +80,12 @@ impl Rend for GraphicTriangle {
 
         if self.direction {
 
-            for x in 0..self.coords[2].0 - self.coords[0].0 {
+            for x in 0.. min(WIDTH,self.coords[2].0 - self.coords[0].0) {
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
 
-                for y in min(y1, y2)..max(y1, y2) {
+                for y in max(1 , min(y1, y2)) .. min(HEIGHT,max(y1, y2)) {
+
                     paint_it(rendered, self.surf, &(x + self.coords[0].0, y))
                 }
 
@@ -92,11 +93,11 @@ impl Rend for GraphicTriangle {
 
         } else {
 
-            for x in 0..self.coords[1].0 - self.coords[0].0 {
+            for x in 0.. min(WIDTH, self.coords[1].0 - self.coords[0].0) {
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
 
-                for y in min(y1, y2)..max(y1, y2) {
+                for y in max(1 , min(y1, y2)) .. min(HEIGHT,max(y1, y2)) {
 
                     paint_it(rendered, self.surf, &(x + self.coords[0].0, y))
 
