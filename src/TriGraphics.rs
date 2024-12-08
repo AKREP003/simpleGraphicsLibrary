@@ -1,14 +1,15 @@
+use crate::camera::Camera;
 use crate::graphics::{Colour, Compile, DiCoordinate, GraphicObjects, Surface};
 use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::DiComplex::{ComplexTriangle, Quadrangle};
 use crate::render::Arche;
 use crate::render::Arche::Tri;
-use crate::transitions::{rotate_coordinate, Transformation, Transformer, tri_to_di};
+use crate::transitions::{di_to_tri, rotate_coordinate, Transformation, Transformer, tri_to_di};
 use crate::TriGraphics::TriObjects::{ TriTring};
 
 pub type SphericalCoordinate = (f32, f32, f32);
 pub type CartesianCoordinate = (f64, f64, f64);
-
+pub type Oriantation = (f64, f64, f64);
 
 fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
     let (r, theta, phi) = c;
@@ -132,6 +133,25 @@ impl TriQuadrangle {
         (x, y,  z)
 
     }
+
+    pub fn projection(&mut self, cam: &Camera, focal_length: f64) {
+        // Apply projection to each coordinate
+        for i in 0..4 {
+
+            let projected = cam.project_to_2d(self.coords[i], focal_length);
+            self.coords[i] = (projected.0, projected.1, 0.0); // Retain original z
+        }
+
+        // Update derived properties
+        self.di = Quadrangle::construct(&mut [
+            tri_to_di(self.coords[0]),
+            tri_to_di(self.coords[1]),
+            tri_to_di(self.coords[2]),
+            tri_to_di(self.coords[3]),
+        ], self.surface.clone());
+        self.center = self.get_center();
+    }
+
 
 }
 

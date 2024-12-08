@@ -2,7 +2,7 @@ use std::cmp::{max, min};
 use std::f32::consts::PI;
 use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
-use crate::{HEIGHT, init, WIDTH};
+use crate::{HEIGHT, WIDTH};
 use crate::DiComplex::ComplexObjects::CTriangle;
 use crate::transitions::{rotate_coordinate, Transformation, Transformer};
 use crate::graphics::GraphicObjects::Triangle;
@@ -80,26 +80,46 @@ impl Rend for GraphicTriangle {
 
         if self.direction {
 
-            for x in 0.. min(WIDTH,self.coords[2].0 - self.coords[0].0) {
+            for x in 0.. self.coords[2].0 - self.coords[0].0 {
+
+                let r_x = x + self.coords[0].0;
+
+                if r_x < 1 || r_x > WIDTH {continue}
+
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
 
-                for y in max(1 , min(y1, y2)) .. min(HEIGHT,max(y1, y2)) {
+                for y in min(y1, y2).. max(y1, y2) {
 
-                    paint_it(rendered, self.surf, &(x + self.coords[0].0, y))
+                    let coord = (r_x, y);
+
+                    if  y > 1 && y < HEIGHT - 1 {
+                        paint_it(rendered, self.surf, &coord);
+                    }
+
+
                 }
 
             }
 
         } else {
 
-            for x in 0.. min(WIDTH, self.coords[1].0 - self.coords[0].0) {
+            for x in 0..  self.coords[1].0 - self.coords[0].0 {
+
+                let r_x = x + self.coords[0].0;
+
+                if r_x < 1 || r_x > WIDTH {continue}
+
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
 
-                for y in max(1 , min(y1, y2)) .. min(HEIGHT,max(y1, y2)) {
+                for y in min(y1, y2).. max(y1, y2) {
 
-                    paint_it(rendered, self.surf, &(x + self.coords[0].0, y))
+                    let coord = (r_x, y);
+
+                    if y > 1 && y < HEIGHT - 1 { //further optimization is within the goals
+                        paint_it(rendered, self.surf, &coord);
+                    }
 
                 }
             }

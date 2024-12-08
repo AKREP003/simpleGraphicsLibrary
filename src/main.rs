@@ -10,6 +10,7 @@ mod TriGraphics;
 mod DiComplex;
 mod TriComplex;
 mod transitions;
+mod camera;
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
@@ -29,9 +30,11 @@ use crate::TriGraphics::{TriObjects, TriQuadrangle, TriTriangle};
 use crate::TriGraphics::TriObjects::TriLine;
 use lazy_static::lazy_static;
 use transitions::Transformation;
+use crate::camera::Camera;
 use crate::render::Arche::Null;
 use crate::render::Arche;
 use crate::transitions::{from_angles, Transformer};
+use mouse_position::mouse_position::{Mouse};
 
 
 static mut init:bool = true;
@@ -51,11 +54,20 @@ static mut SHAPE:Arche = Null; //ComplexTriangle::construct(&mut [(WIDTH / 2, HE
 static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
 // todo: https://en.wikipedia.org/wiki/3D_projection
 
-
+static mut cam : Camera = Camera { position: (((WIDTH / 2) ) as f64, ((HEIGHT / 2) ) as f64, 0.0), orientation: (0.0, 0.0, 10.0) };
 
 unsafe fn oct() -> Option<State> {
 
+    let position = Mouse::get_mouse_position();
+    match position {
+        Mouse::Position { x, y } => {
 
+            cam.orientation.0 = ((((y as f64) - 540.0) / 1080.0) * 720.0);
+            cam.orientation.1 = ((((x as f64) - 960.0) / 1919.0) * 360.0);
+
+        },
+        Mouse::Error => println!("Error getting mouse position"),
+    }
 
     let now = Instant::now();
 
@@ -63,19 +75,27 @@ unsafe fn oct() -> Option<State> {
         return None
     } else { LAST_RUN_TIME = Some(now); }
 
-    let r30: Transformer = from_angles(-5.0, -2.0,5.0);
+    let r30: Transformer = from_angles(5.0, 5.0,0.0);
 
     init = false;
 
     let mut piv = (0.0,0.0,0.0);
 
-    if let Arche::TriC(tri) = &SHAPE { if let TriComplexes::RectangularPrism(prism) = &tri {piv = prism.center}};
+    let mut projection_buffer = Null;
 
-    SHAPE.rotate(r30, piv);
+
+
+    if let Arche::TriC(tri) = &SHAPE { if let TriComplexes::RectangularPrism(prism) = &tri {
+        piv = prism.center;
+        SHAPE.rotate(r30, piv);
+        projection_buffer = prism.projection(&cam, 100.0).into()
+    }};
+
+
 
     Some(State {
         objects:vec![
-            SHAPE.clone()
+            projection_buffer
         ],
         canvas:Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize])
     })
@@ -91,12 +111,12 @@ fn main() {
         Flat((0, 200, 0, 255)),
              Flat((0, 0, 200, 100)),
                   Flat((0, 100, 200, 255)),
-                       Flat((0, 0, 0, 0)),
+                       Flat((0, 0, 0, 100)),
                             Flat((100, 100, 100, 0)),
     ];
 
     unsafe {
-        SHAPE = Rectprism::construct((((WIDTH / 2) - 75).into(), ((HEIGHT / 2) - 25).into(), 100.0), [100.0, 100.0, 100.0],colors).into();
+        SHAPE = Rectprism::construct((((WIDTH / 2) ) as f64, ((HEIGHT / 2) ) as f64, 100.0), [100.0, 50.0, 100.0],colors).into();
 
         LAST_RUN_TIME = Some(Instant::now());
 
