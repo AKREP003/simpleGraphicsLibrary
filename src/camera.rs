@@ -23,16 +23,14 @@ impl Camera {
         //println!("{:?}", relative_position);
 
         let (x, y, z) = matrix_mult(relative_position, rotation_matrix);
-
         if z <= 0.0 {
 
-            println!("{:?}", x);
-            println!("{:?}", y);
+
             return (((x ) * focal_length) + (WIDTH as f64 / 2.0), ((y ) * focal_length) + (HEIGHT as f64 / 2.0), z);
 
         }
 
-        return (((x / z) * focal_length) + (WIDTH as f64 / 2.0), ((y / z) * focal_length) + (HEIGHT as f64 / 2.0), z);
+        return (((x / z) * focal_length) + (WIDTH as f64 / 2.0), ((y / z) * focal_length) + (HEIGHT as f64 / 2.0), 0.0);
     }
 
 

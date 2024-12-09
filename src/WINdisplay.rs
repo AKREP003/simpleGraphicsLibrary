@@ -13,7 +13,7 @@ use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
 use winapi::shared::ntdef::LPCSTR;
 
 pub const WIDTH: i32 = 640;
-pub const HEIGHT: i32 = 480;
+pub const HEIGHT: i32 = 640;
 
 use crate::DiComplex::ComplexObjects;
 use crate::render::{Arche, State};

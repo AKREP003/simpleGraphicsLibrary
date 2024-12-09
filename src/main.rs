@@ -41,7 +41,7 @@ use mouse_position::mouse_position::{Mouse};
 static mut init:bool = true;
 
 static degree:f64 = 30.0;
-
+//todo https://en.wikipedia.org/wiki/Wavefront_.obj_file
 
 
 static mut SHAPE:Arche = Null; //ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0))).into();
@@ -64,7 +64,7 @@ unsafe fn oct() -> Option<State> {
         Mouse::Position { x, y } => {
 
             cam.orientation.0 = -((((x as f64) - 960.0) / 1920.0) * 360.0) ;
-            cam.orientation.1 = -((((y as f64) - 540.0) / 1080.0) * 120.0);
+            cam.orientation.1 = -((((y as f64) - 540.0) / 1080.0) * 180.0);
 
         },
         Mouse::Error => println!("Error getting mouse position"),
@@ -89,7 +89,7 @@ unsafe fn oct() -> Option<State> {
     if let Arche::TriC(tri) = &SHAPE { if let TriComplexes::RectangularPrism(prism) = &tri {
         piv = prism.center;
         SHAPE.rotate(r30, piv);
-        projection_buffer = prism.projection(&cam, 100.0).into()
+        projection_buffer = prism.projection(&cam, 350.0).into()
     }};
 
 
@@ -117,7 +117,7 @@ fn main() {
     ];
 
     unsafe {
-        SHAPE = Rectprism::construct((((WIDTH / 2) - 50) as f64, ((HEIGHT / 2) - 50) as f64, 100.0), [100.0, 50.0, 100.0],colors).into();
+        SHAPE = Rectprism::construct((((WIDTH / 2) - 50) as f64, ((HEIGHT / 2) - 50) as f64, 300.0), [100.0, 50.0, 100.0],colors).into();
 
         LAST_RUN_TIME = Some(Instant::now());
 
