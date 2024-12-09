@@ -12,7 +12,7 @@ pub struct Camera {
 
 impl Camera {
 
-    pub fn projection(&self, c: CartesianCoordinate) -> CartesianCoordinate {
+    pub fn projection(&self, c: CartesianCoordinate, focal_length: f64) -> CartesianCoordinate {
         let relative_position = matrix_sub(c, self.position);
         let rotation_matrix = from_angles(
             -self.orientation.0,
@@ -20,29 +20,22 @@ impl Camera {
             -self.orientation.2,
         );
 
+        //println!("{:?}", relative_position);
 
-        let b = matrix_add(matrix_mult(relative_position, rotation_matrix), (c.2, c.1, 0.0));
+        let (x, y, z) = matrix_mult(relative_position, rotation_matrix);
 
-        println!("b: {:?}", b);
+        if z <= 0.0 {
 
-        return b;
+            println!("{:?}", x);
+            println!("{:?}", y);
+            return (((x ) * focal_length) + (WIDTH as f64 / 2.0), ((y ) * focal_length) + (HEIGHT as f64 / 2.0), z);
+
+        }
+
+        return (((x / z) * focal_length) + (WIDTH as f64 / 2.0), ((y / z) * focal_length) + (HEIGHT as f64 / 2.0), z);
     }
 
-    pub fn project_to_2d(&self, c: CartesianCoordinate, focal_length: f64) -> (f64, f64) {
-        let transformed = self.projection(c);
 
-        (transformed.0, transformed.1)
-
-        //perspective_projection(transformed, focal_length)
-    }
 
 }
 
-pub fn perspective_projection(point: CartesianCoordinate, focal_length: f64) -> (f64, f64) {
-    let (x, y, z) = point;
-    if z != 0.0 {
-        (x / z * focal_length, y / z * focal_length)
-    } else {
-        (x * focal_length, y * focal_length)
-    }
-}

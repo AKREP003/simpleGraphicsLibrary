@@ -138,8 +138,9 @@ impl TriQuadrangle {
         // Apply projection to each coordinate
         for i in 0..4 {
 
-            let projected = cam.project_to_2d(self.coords[i], focal_length);
-            self.coords[i] = (projected.0, projected.1, 0.0); // Retain original z
+            let projected = cam.projection(self.coords[i], focal_length);
+
+            self.coords[i] = projected; // Retain original z
         }
 
         // Update derived properties
@@ -159,6 +160,7 @@ impl Compile for TriQuadrangle {
     fn compile(&self) -> Vec<GraphicObjects> {
 
         return self.di.compile();
+
     }
 }
 
@@ -173,7 +175,9 @@ impl Transformation<CartesianCoordinate> for TriQuadrangle {
             tri_to_di(self.coords[2]),
             tri_to_di(self.coords[3])
         ], self.surface.clone());
+
         self.center = self.get_center();
+
     }
 }
 

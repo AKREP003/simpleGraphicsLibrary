@@ -14,6 +14,7 @@ mod camera;
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
+use std::intrinsics::{powf64, sqrtf64};
 use std::time::{Duration, Instant};
 use DiComplex::ComplexObjects;
 use graphics::Rend;
@@ -54,7 +55,7 @@ static mut SHAPE:Arche = Null; //ComplexTriangle::construct(&mut [(WIDTH / 2, HE
 static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
 // todo: https://en.wikipedia.org/wiki/3D_projection
 
-static mut cam : Camera = Camera { position: (((WIDTH / 2) ) as f64, ((HEIGHT / 2) ) as f64, 0.0), orientation: (0.0, 0.0, 10.0) };
+static mut cam : Camera = Camera { position: (((WIDTH / 2) ) as f64, ((HEIGHT / 2) ) as f64, 0.0), orientation: (0.0, 0.0, 90.0) };
 
 unsafe fn oct() -> Option<State> {
 
@@ -62,8 +63,8 @@ unsafe fn oct() -> Option<State> {
     match position {
         Mouse::Position { x, y } => {
 
-            cam.orientation.0 = ((((y as f64) - 540.0) / 1080.0) * 720.0);
-            cam.orientation.1 = ((((x as f64) - 960.0) / 1919.0) * 360.0);
+            cam.orientation.0 = -((((x as f64) - 960.0) / 1920.0) * 360.0) ;
+            cam.orientation.1 = -((((y as f64) - 540.0) / 1080.0) * 120.0);
 
         },
         Mouse::Error => println!("Error getting mouse position"),
@@ -116,7 +117,7 @@ fn main() {
     ];
 
     unsafe {
-        SHAPE = Rectprism::construct((((WIDTH / 2) ) as f64, ((HEIGHT / 2) ) as f64, 100.0), [100.0, 50.0, 100.0],colors).into();
+        SHAPE = Rectprism::construct((((WIDTH / 2) - 50) as f64, ((HEIGHT / 2) - 50) as f64, 100.0), [100.0, 50.0, 100.0],colors).into();
 
         LAST_RUN_TIME = Some(Instant::now());
 

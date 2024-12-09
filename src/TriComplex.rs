@@ -162,6 +162,12 @@ impl Rectprism {
 impl Compile for Rectprism {
     fn compile(&self) -> Vec<GraphicObjects> {
 
+        if self.sides[0].get_center().2 < 0.0 {
+
+            return vec![];
+
+        }
+
         let mut buffer = vec![];
 
         for side in self.sides {

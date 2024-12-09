@@ -84,7 +84,7 @@ impl Rend for GraphicTriangle {
 
                 let r_x = x + self.coords[0].0;
 
-                if r_x < 1 || r_x > WIDTH {continue}
+                if r_x < 2 || r_x > WIDTH {continue}
 
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
@@ -93,7 +93,7 @@ impl Rend for GraphicTriangle {
 
                     let coord = (r_x, y);
 
-                    if  y > 1 && y < HEIGHT - 1 {
+                    if  y > 1 && y < HEIGHT - 2 {
                         paint_it(rendered, self.surf, &coord);
                     }
 
@@ -104,11 +104,11 @@ impl Rend for GraphicTriangle {
 
         } else {
 
-            for x in 0..  self.coords[1].0 - self.coords[0].0 {
+            for x in 0 ..  self.coords[1].0 - self.coords[0].0 {
 
                 let r_x = x + self.coords[0].0;
 
-                if r_x < 1 || r_x > WIDTH {continue}
+                if r_x < 2 || r_x > WIDTH {continue}
 
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
@@ -117,7 +117,7 @@ impl Rend for GraphicTriangle {
 
                     let coord = (r_x, y);
 
-                    if y > 1 && y < HEIGHT - 1 { //further optimization is within the goals
+                    if y > 1 && y < HEIGHT - 2 { //further optimization is within the goals
                         paint_it(rendered, self.surf, &coord);
                     }
 
