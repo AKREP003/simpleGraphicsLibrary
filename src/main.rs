@@ -29,14 +29,13 @@ use crate::TriComplex::{Rectprism, TriComplexes};
 use crate::TriComplex::TriComplexes::RectangularPrism;
 use crate::TriGraphics::{TriObjects, TriQuadrangle, TriTriangle};
 use crate::TriGraphics::TriObjects::TriLine;
-use lazy_static::lazy_static;
 use transitions::Transformation;
 use crate::camera::Camera;
 use crate::render::Arche::Null;
 use crate::render::Arche;
 use crate::transitions::{from_angles, Transformer};
-use mouse_position::mouse_position::{Mouse};
-
+use winapi::um::winuser::GetCursorPos;
+use winapi::shared::windef::POINT;
 
 static mut init:bool = true;
 
@@ -59,16 +58,17 @@ static mut cam : Camera = Camera { position: (((WIDTH / 2) ) as f64, ((HEIGHT / 
 
 unsafe fn oct() -> Option<State> {
 
-    let position = Mouse::get_mouse_position();
-    match position {
-        Mouse::Position { x, y } => {
+    let mut pointer:POINT = POINT {
+        x:0,
+        y:0
+    };
 
-            cam.orientation.0 = -((((x as f64) - 960.0) / 1920.0) * 360.0) ;
-            cam.orientation.1 = -((((y as f64) - 540.0) / 1080.0) * 180.0);
+    GetCursorPos(&mut pointer);
 
-        },
-        Mouse::Error => println!("Error getting mouse position"),
-    }
+    cam.orientation.0 = -((((pointer.x as f64) - 960.0) / 1920.0) * 360.0) ;
+    cam.orientation.1 = -((((pointer.y as f64) - 540.0) / 1080.0) * 180.0);
+
+
 
     let now = Instant::now();
 
