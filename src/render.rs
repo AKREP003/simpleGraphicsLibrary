@@ -1,56 +1,44 @@
+use std::thread;
 
 use crate::{HEIGHT, WIDTH};
-use crate::graphics::{GraphicObjects, Rend, Visual};
-use std::thread;
 use crate::DiComplex::{ComplexObjects, ComplexTriangle, Quadrangle};
 use crate::DiComplex::ComplexObjects::Polygon;
-use crate::graphics::Surface::Flat;
+use crate::graphics::{GraphicObjects, Rend, Visual};
 use crate::graphics::Compile;
+use crate::graphics::Surface::Flat;
 use crate::render::Arche::Tri;
 use crate::transitions::{Transformation, Transformer};
 use crate::TriComplex::{Rectprism, TriComplexes};
 use crate::TriGraphics::{CartesianCoordinate, TriObjects, TriQuadrangle, TriTriangle};
 use crate::TriGraphics::TriObjects::TriTring;
 
-pub(crate)  fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
-
+pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
     unsafe {
-
         if objects.len() == 0 {
             //thread::yield_now();
-            return
+            return;
         }
 
-        let mut objectBuffer:Vec<GraphicObjects> = vec![];
+        let mut objectBuffer: Vec<GraphicObjects> = vec![];
 
         for object in objects.iter() {
-
             objectBuffer.append(&mut object.compile());
-
-
         }
 
 
         for graphic in objectBuffer {
-
             graphic.rend(pixels);
-
         }
-
     }
-
-
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum Arche {
-
     TriC(TriComplexes),
     Tri(TriObjects),
     Di(ComplexObjects),
     Graphic(GraphicObjects),
-    Null
-
+    Null,
 }
 
 impl From<TriTriangle> for Arche {
@@ -71,7 +59,7 @@ impl From<Quadrangle> for Arche {
     }
 }
 
-impl From<TriQuadrangle> for Arche{
+impl From<TriQuadrangle> for Arche {
     fn from(value: TriQuadrangle) -> Self {
         Arche::Tri(TriObjects::TriQuad(value))
     }
@@ -90,14 +78,13 @@ impl Compile for Arche {
             Arche::Di(di) => di.compile(),
             Arche::Graphic(gr) => vec![gr.clone()],
             Arche::TriC(tri) => tri.compile(),
-            Arche::Null => {vec![]}
+            Arche::Null => { vec![] }
         }
     }
 }
 
-impl Transformation<CartesianCoordinate> for Arche{
+impl Transformation<CartesianCoordinate> for Arche {
     fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
-
         match self {
             Arche::Tri(tri) => tri.rotate(trans, pivot),
             Arche::Di(di) => di.rotate(trans, pivot),
@@ -109,11 +96,9 @@ impl Transformation<CartesianCoordinate> for Arche{
 }
 
 pub struct State {
+    pub(crate) objects: Vec<Arche>,
 
-    pub(crate) objects:Vec<Arche>,
-
-    pub canvas:Option<Visual>,
-
+    pub canvas: Option<Visual>,
 
 }
 

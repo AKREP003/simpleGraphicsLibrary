@@ -2,12 +2,13 @@ use std::cmp::{max, min};
 use std::f32::consts::PI;
 use std::intrinsics::{ceilf32, floorf32, roundf32};
 use std::process::exit;
+
 use crate::{HEIGHT, WIDTH};
 use crate::DiComplex::ComplexObjects::CTriangle;
-use crate::transitions::{rotate_coordinate, Transformation, Transformer};
 use crate::graphics::GraphicObjects::Triangle;
 use crate::graphics::Surface::Flat;
 use crate::render::State;
+use crate::transitions::{rotate_coordinate, Transformation, Transformer};
 use crate::TriGraphics::CartesianCoordinate;
 
 pub type Visual = Vec<u8>;
@@ -24,119 +25,94 @@ pub type Colour = (u8, u8, u8, u8);
 
 pub type DiCoordinate = (i32, i32);
 
-fn indexify(c:&DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
+fn indexify(c: &DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
 #[derive(Clone, Debug, Copy)]
 pub struct GraphicTriangle {
+    lines: [InfLine; 2],
 
-    lines : [InfLine; 2],
+    pub coords: [DiCoordinate; 3],
 
-    pub coords : [DiCoordinate; 3],
+    direction: bool,
 
-    direction : bool,
-
-    pub surf : Surface
-
+    pub surf: Surface,
 }
 
 impl GraphicTriangle {
-
-    pub fn construct(mut coords : [DiCoordinate; 3], surf : Surface) -> GraphicTriangle{
-
+    pub fn construct(mut coords: [DiCoordinate; 3], surf: Surface) -> GraphicTriangle {
         coords.sort_by(|a, b| (a.0).cmp(&b.0));
 
-        let mut lines : [InfLine; 2];
+        let mut lines: [InfLine; 2];
 
         let direction = coords[0].0 == coords[1].0;
 
-        if  direction {
+        if direction {
             lines = [
                 line_between_points(coords[0], coords[2]),
                 line_between_points(coords[1], coords[2])
             ].into_iter().filter_map(|x| x).collect::<Vec<(f32, i32)>>().try_into().expect("eee");
         } else if coords[1].0 == coords[2].0 {
-
             lines = [
                 line_between_points(coords[0], coords[1]),
                 line_between_points(coords[0], coords[2])
             ].into_iter().filter_map(|x| x).collect::<Vec<(f32, i32)>>().try_into().expect("eee");
         } else {
-
             panic!("use the complex triangle, dont fuck with graphic triangles")
-
         }
 
-        return GraphicTriangle {lines, coords, direction, surf };
-
+        return GraphicTriangle { lines, coords, direction, surf };
     }
 
-    pub fn into(&self) -> GraphicObjects {Triangle(*self)}
-
-
+    pub fn into(&self) -> GraphicObjects { Triangle(*self) }
 }
 
 impl Rend for GraphicTriangle {
     fn rend(&self, rendered: &mut Visual) {
-
         if self.direction {
-
-            for x in 0.. self.coords[2].0 - self.coords[0].0 {
-
+            for x in 0..self.coords[2].0 - self.coords[0].0 {
                 let r_x = x + self.coords[0].0;
 
-                if r_x < 2 || r_x > WIDTH {continue}
+                if r_x < 2 || r_x > WIDTH { continue; }
 
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
 
-                for y in min(y1, y2).. max(y1, y2) {
-
+                for y in min(y1, y2)..max(y1, y2) {
                     let coord = (r_x, y);
 
-                    if  y > 1 && y < HEIGHT - 2 {
+                    if y > 1 && y < HEIGHT - 2 {
                         paint_it(rendered, self.surf, &coord);
                     }
-
-
                 }
-
             }
-
         } else {
-
-            for x in 0 ..  self.coords[1].0 - self.coords[0].0 {
-
+            for x in 0..self.coords[1].0 - self.coords[0].0 {
                 let r_x = x + self.coords[0].0;
 
-                if r_x < 2 || r_x > WIDTH {continue}
+                if r_x < 2 || r_x > WIDTH { continue; }
 
                 let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
                 let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
 
-                for y in min(y1, y2).. max(y1, y2) {
-
+                for y in min(y1, y2)..max(y1, y2) {
                     let coord = (r_x, y);
 
                     if y > 1 && y < HEIGHT - 2 { //further optimization is within the goals
                         paint_it(rendered, self.surf, &coord);
                     }
-
                 }
             }
         }
-
     }
 }
 
 #[derive(Clone, Debug, Copy)]
 pub enum GraphicObjects {
-
     Pixel(DiCoordinate, Colour),
 
     Line(DiCoordinate, DiCoordinate, Colour),
 
     Triangle(GraphicTriangle),
-
 
 }
 
@@ -147,21 +123,16 @@ impl From<GraphicTriangle> for GraphicObjects {
 }
 
 impl Rend for GraphicObjects {
-
     fn rend(&self, rendered: &mut Visual) {
-
         match self {
-
             GraphicObjects::Pixel(coordinate, colour) => {
+                let index: usize = indexify(coordinate);
 
-                let index:usize = indexify(coordinate);
-
-                rendered[index]     = colour.0;
+                rendered[index] = colour.0;
                 rendered[index + 1] = colour.1;
                 rendered[index + 2] = colour.2;
                 rendered[index + 3] = colour.3;
-
-            },
+            }
 
             GraphicObjects::Line(coordinate1, coordinate2, colour) => {
                 let mut x1 = coordinate1.0;
@@ -201,26 +172,21 @@ impl Rend for GraphicObjects {
                         y1 += sy;
                     }
                 }
-            },
+            }
 
             GraphicObjects::Triangle(G) => { G.rend(rendered) }
         }
-
     }
-
 }
 
 #[derive(Clone, Debug, Copy)]
 pub enum Surface {
-
     Flat(Colour)
-
 }
 
 type InfLine = (f32, i32);
 
-pub fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
-
+pub fn crossing_point(x: i32, light: Option<InfLine>) -> Option<i32> {
     match light {
         Some((slope, intercept)) => unsafe {
             let y = slope * (x as f32) + (intercept as f32);
@@ -228,10 +194,9 @@ pub fn crossing_point(x:i32, light: Option<InfLine>) -> Option<i32> {
         },
         None => None
     }
+}
 
-    }
-
-pub  fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine> {
+pub fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine> {
     let dx = p2.0 - p1.0;
     let dy = p2.1 - p1.1;
 
@@ -273,19 +238,17 @@ fn alpha_blend(foreground: (u8, u8, u8, u8), background: (u8, u8, u8, u8)) -> (u
     )
 }
 
-fn paint_it(rendered : &mut Visual, surface : Surface, cord : &DiCoordinate) {
-
+fn paint_it(rendered: &mut Visual, surface: Surface, cord: &DiCoordinate) {
     let index = indexify(cord);
 
     match surface {
         Flat(colour) => {
-
             let updated = alpha_blend(colour,
                                       (
                                           rendered[index],
                                           rendered[index + 1],
                                           rendered[index + 2],
-                                          rendered[index + 3],));
+                                          rendered[index + 3], ));
 
             rendered[index] = updated.0;
             rendered[index + 1] = updated.1;
@@ -293,7 +256,6 @@ fn paint_it(rendered : &mut Visual, surface : Surface, cord : &DiCoordinate) {
             rendered[index + 3] = updated.3;
         }
     }
-
 }
 
 

@@ -1,22 +1,23 @@
 use std::{ptr, thread};
 use std::ffi::CString;
-use std::time::{Duration};
-use winapi::um::wingdi::{BITMAPINFO, BITMAPINFOHEADER, BI_RGB, SetDIBitsToDevice, RGBQUAD};
-use winapi::um::winuser::{
-    CreateWindowExA, DefWindowProcA, DispatchMessageA, GetDC, LoadCursorW, RegisterClassA,
-    TranslateMessage, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT, IDC_ARROW, MSG, WNDCLASSA, WM_DESTROY,
-    WM_PAINT, WS_OVERLAPPEDWINDOW, WS_VISIBLE, PostQuitMessage,
-};
-use winapi::um::libloaderapi::GetModuleHandleA;
-use winapi::shared::windef::{HWND, HDC};
-use winapi::shared::minwindef::{UINT, WPARAM, LPARAM, LRESULT};
-use winapi::shared::ntdef::LPCSTR;
+use std::sync::{Arc, Mutex};
+use std::sync::mpsc::{self, Receiver, Sender};
+use std::time::Duration;
 
-pub const WIDTH: i32 = 640;
-pub const HEIGHT: i32 = 640;
+use winapi::shared::minwindef::{LPARAM, LRESULT, UINT, WPARAM};
+use winapi::shared::ntdef::LPCSTR;
+use winapi::shared::windef::{HDC, HWND};
+use winapi::um::libloaderapi::GetModuleHandleA;
+use winapi::um::processthreadsapi::{CreateProcessA, CreateThread, GetCurrentThreadId};
+use winapi::um::wingdi::{BI_RGB, BITMAPINFO, BITMAPINFOHEADER, RGBQUAD, SetDIBitsToDevice};
+use winapi::um::winuser::{AttachThreadInput, CreateWindowExA, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT, DefWindowProcA, DispatchMessageA, GetDC, GetKeyboardState, IDC_ARROW, LoadCursorW, MSG, PostQuitMessage, RegisterClassA, TranslateMessage, WM_DESTROY, WM_PAINT, WNDCLASSA, WS_OVERLAPPEDWINDOW, WS_VISIBLE};
 
 use crate::DiComplex::ComplexObjects;
 use crate::render::{Arche, State};
+use crate::TriGame::camera_transition;
+
+pub const WIDTH: i32 = 900;
+pub const HEIGHT: i32 = 900;
 
 type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Arche>);
 
@@ -34,28 +35,12 @@ unsafe extern "system" fn window_proc(
     w_param: WPARAM,
     l_param: LPARAM,
 ) -> LRESULT {
-    thread::sleep(Duration::from_millis(15)); //144 fps
-
     match msg {
         WM_PAINT => {
             let hdc: HDC = GetDC(hwnd);
 
-            if let Some(callback) = DRAW_CALLBACK {
 
-                if let Some(s) = EVENTLOOP && let Some(state) = s(){
-
-                    if let Some(v) = state.canvas {
-                        PIXEL_BUFFER = v;
-                    }
-
-                    callback(&mut PIXEL_BUFFER, state.objects);
-
-
-                }
-
-            }
-
-            let rgbq:RGBQUAD = RGBQUAD {
+            let rgbq: RGBQUAD = RGBQUAD {
                 rgbBlue: 0,
                 rgbGreen: 0,
                 rgbRed: 0,
@@ -106,12 +91,41 @@ unsafe extern "system" fn window_proc(
     }
 }
 
+unsafe extern "system" fn render_loop(_: *mut winapi::ctypes::c_void) -> u32 {
+    while true {
+        if let Some(callback) = DRAW_CALLBACK {
+            if let Some(s) = EVENTLOOP && let Some(state) = s() {
+                if let Some(v) = state.canvas {
+                    PIXEL_BUFFER = v;
+                }
+
+                callback(&mut PIXEL_BUFFER, state.objects);
+            }
+        }
+    }
+
+    return 0;
+}
+
+
 // Wrapper function to set up and run the window loop
-pub fn run_window(draw_callback: DrawCallback, event_loop:EventLoop) {
-
+pub fn run_window(draw_callback: DrawCallback, event_loop: EventLoop) {
     unsafe {
+        let mut renderId: u32 = 0;
 
-        PIXEL_BUFFER =  vec![0u8; (WIDTH * HEIGHT * 4) as usize];
+        CreateThread(
+            ptr::null_mut(),
+            0,
+            Some(render_loop),
+            ptr::null_mut(),
+            0,
+            &mut renderId as *mut u32,
+        );
+
+        AttachThreadInput(GetCurrentThreadId(), renderId, 1);
+
+
+        PIXEL_BUFFER = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
 
         let h_instance = GetModuleHandleA(ptr::null());
         let class_name = CString::new("window").unwrap();
@@ -148,13 +162,20 @@ pub fn run_window(draw_callback: DrawCallback, event_loop:EventLoop) {
             h_instance,
             ptr::null_mut(),
         );
+
+
         // Run the message loop
         let mut msg: MSG = std::mem::zeroed();
-        while winapi::um::winuser::GetMessageA(&mut msg, ptr::null_mut(), 0, 0) > 0 {
+        while winapi::um::winuser::PeekMessageA(&mut msg, ptr::null_mut(), 0, 400, 1) > 0 {
+            camera_transition();
+
             TranslateMessage(&msg);
             DispatchMessageA(&msg);
         }
     }
 }
+
+
+
 
 

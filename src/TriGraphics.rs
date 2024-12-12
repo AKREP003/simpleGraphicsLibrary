@@ -1,11 +1,11 @@
 use crate::camera::Camera;
-use crate::graphics::{Colour, Compile, DiCoordinate, GraphicObjects, Surface};
-use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::DiComplex::{ComplexTriangle, Quadrangle};
+use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
+use crate::graphics::{Colour, Compile, DiCoordinate, GraphicObjects, Surface};
 use crate::render::Arche;
 use crate::render::Arche::Tri;
 use crate::transitions::{di_to_tri, rotate_coordinate, Transformation, Transformer, tri_to_di};
-use crate::TriGraphics::TriObjects::{ TriTring};
+use crate::TriGraphics::TriObjects::TriTring;
 
 pub type SphericalCoordinate = (f32, f32, f32);
 pub type CartesianCoordinate = (f64, f64, f64);
@@ -16,31 +16,28 @@ fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
     let x = r * theta.cos() * phi.sin();
     let y = r * theta.sin() * phi.sin();
     let z = r * phi.cos();
-    (x.into() , y.into() , z.into() )
+    (x.into(), y.into(), z.into())
 }
 
 #[derive(Clone, Copy, Debug)]
 pub struct TriTriangle {
-
-    di : ComplexTriangle,
-    coords : [CartesianCoordinate; 3],
-    surface : Surface,
-    pub center : CartesianCoordinate,
+    di: ComplexTriangle,
+    coords: [CartesianCoordinate; 3],
+    surface: Surface,
+    pub center: CartesianCoordinate,
 
 }
 
 impl TriTriangle {
-
     pub fn construct(coords: &mut [CartesianCoordinate; 3], surface: Surface) -> Self {
-
-        let mut buffer:[DiCoordinate; 3] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2])];
+        let mut buffer: [DiCoordinate; 3] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2])];
 
         let di = ComplexTriangle::construct(&mut buffer, surface.clone());
         let mut buffer = TriTriangle {
             di,
             coords: *coords,
             surface,
-            center : (0.0,0.0,0.0),
+            center: (0.0, 0.0, 0.0),
         };
 
         buffer.center = buffer.get_center();
@@ -49,23 +46,21 @@ impl TriTriangle {
     }
 
     pub fn get_center(&self) -> CartesianCoordinate {
-        let mut x:f64 = 0.0;
-        let mut y:f64 = 0.0;
-        let mut z:f64 = 0.0;
+        let mut x: f64 = 0.0;
+        let mut y: f64 = 0.0;
+        let mut z: f64 = 0.0;
 
         self.coords.iter().for_each(|d|
             {
                 y += (d.1 as f64 / 3.0);
-                x += (d.0 as f64/ 3.0);
-                z += (d.2 as f64/ 3.0);
+                x += (d.0 as f64 / 3.0);
+                z += (d.2 as f64 / 3.0);
             }
         );
 
 
-        (x, y,  z)
-
+        (x, y, z)
     }
-
 }
 
 impl Compile for TriTriangle {
@@ -86,22 +81,20 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
         ], self.surface.clone());
 
         self.center = self.get_center();
-
     }
 }
 
 #[derive(Clone, Copy, Debug)]
 pub struct TriQuadrangle {
-    di : Quadrangle,
-    coords : [CartesianCoordinate; 4],
-    surface : Surface,
-    center : CartesianCoordinate,
+    di: Quadrangle,
+    coords: [CartesianCoordinate; 4],
+    surface: Surface,
+    center: CartesianCoordinate,
 }
 
 impl TriQuadrangle {
     pub fn construct(coords: &mut [CartesianCoordinate; 4], surface: Surface) -> Self {
-
-        let mut buffer:[DiCoordinate; 4] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2]), tri_to_di(coords[3])];
+        let mut buffer: [DiCoordinate; 4] = [tri_to_di(coords[0]), tri_to_di(coords[1]), tri_to_di(coords[2]), tri_to_di(coords[3])];
 
         let di = Quadrangle::construct(&mut buffer, surface.clone());
 
@@ -109,7 +102,7 @@ impl TriQuadrangle {
             di,
             coords: *coords,
             surface,
-            center : (0.0, 0.0, 0.0),
+            center: (0.0, 0.0, 0.0),
         };
         buffer.center = buffer.get_center();
 
@@ -117,27 +110,25 @@ impl TriQuadrangle {
     }
 
     pub fn get_center(&self) -> CartesianCoordinate {
-        let mut x:f64 = 0.0;
-        let mut y:f64 = 0.0;
-        let mut z:f64 = 0.0;
+        let mut x: f64 = 0.0;
+        let mut y: f64 = 0.0;
+        let mut z: f64 = 0.0;
 
         self.coords.iter().for_each(|d|
             {
                 y += (d.1 as f64 / 4.0);
-                x += (d.0 as f64/ 4.0);
-                z += (d.2 as f64/ 4.0);
+                x += (d.0 as f64 / 4.0);
+                z += (d.2 as f64 / 4.0);
             }
         );
 
 
-        (x, y,  z)
-
+        (x, y, z)
     }
 
     pub fn projection(&mut self, cam: &Camera, focal_length: f64) {
         // Apply projection to each coordinate
         for i in 0..4 {
-
             let projected = cam.projection(self.coords[i], focal_length);
 
             self.coords[i] = projected; // Retain original z
@@ -152,15 +143,11 @@ impl TriQuadrangle {
         ], self.surface.clone());
         self.center = self.get_center();
     }
-
-
 }
 
 impl Compile for TriQuadrangle {
     fn compile(&self) -> Vec<GraphicObjects> {
-
         return self.di.compile();
-
     }
 }
 
@@ -177,7 +164,6 @@ impl Transformation<CartesianCoordinate> for TriQuadrangle {
         ], self.surface.clone());
 
         self.center = self.get_center();
-
     }
 }
 
@@ -191,28 +177,20 @@ pub enum TriObjects {
 
 impl Compile for TriObjects {
     fn compile(&self) -> Vec<GraphicObjects> {
-
         match self {
-            TriObjects::TriLine((x1,y1 , _), (x2,y2 , _), c) => {
-
+            TriObjects::TriLine((x1, y1, _), (x2, y2, _), c) => {
                 vec![GraphicObjects::Line((x1.round() as i32, y1.round() as i32), (x2.round() as i32, y2.round() as i32), *c)]
-
-            },
+            }
 
             TriObjects::TriTring(t) => {
-
                 return t.compile();
-
-            },
+            }
 
             TriObjects::TriQuad(q) => {
-
                 return q.compile();
             }
         }
-
     }
-
 }
 
 impl Transformation<CartesianCoordinate> for TriObjects {
@@ -221,17 +199,15 @@ impl Transformation<CartesianCoordinate> for TriObjects {
             TriObjects::TriLine(x, y, _) => {
                 *x = rotate_coordinate(*x, trans, pivot);
                 *y = rotate_coordinate(*y, trans, pivot);
-            },
+            }
 
             TriObjects::TriTring(t) => {
                 t.rotate(trans, pivot)
-            },
+            }
 
             TriObjects::TriQuad(q) => {
                 q.rotate(trans, pivot)
-
             }
         }
     }
-
 }
