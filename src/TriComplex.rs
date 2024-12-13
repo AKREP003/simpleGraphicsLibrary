@@ -7,16 +7,38 @@ use crate::TriComplex::TriComplexes::RectangularPrism;
 use crate::TriGraphics::{CartesianCoordinate, TriQuadrangle};
 use crate::TriGraphics::TriObjects::*;
 
-//todo find center
 //todo add templates
 //todo optimize every function that doesnt take ref
 
+#[derive(Clone, Debug, Copy)]
+pub enum TriComplexes {
+    RectangularPrism(
+        Rectprism
+    )
+}
+
+
+impl Compile for TriComplexes {
+    fn compile(&self) -> Vec<GraphicObjects> {
+        match self {
+            TriComplexes::RectangularPrism(q) => { return q.compile(); }
+        }
+    }
+}
+
+impl Transformation<CartesianCoordinate> for TriComplexes {
+    fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
+        match self {
+            TriComplexes::RectangularPrism(q) => {
+                q.rotate(trans, pivot)
+            }
+        }
+    }
+}
 
 #[derive(Clone, Debug, Copy)]
 pub struct Rectprism {
     sides: [TriQuadrangle; 6],
-
-    surfaces: [Surface; 6],
 
     pub center: CartesianCoordinate,
 }
@@ -116,7 +138,7 @@ impl Rectprism {
             }
         );
 
-        Rectprism { sides, surfaces, center: (x, y, z) }
+        Rectprism { sides, center: (x, y, z) }
     }
 
     pub fn get_center(&self) -> CartesianCoordinate {
@@ -177,29 +199,10 @@ impl Transformation<CartesianCoordinate> for Rectprism {
     }
 }
 
-#[derive(Clone, Debug, Copy)]
-pub enum TriComplexes {
-    RectangularPrism(
-        Rectprism
-    )
-}
+#[derive(Clone, Debug)]
+pub struct TriCustom {
 
+    sides : Vec<TriQuadrangle>
 
-impl Compile for TriComplexes {
-    fn compile(&self) -> Vec<GraphicObjects> {
-        match self {
-            TriComplexes::RectangularPrism(q) => { return q.compile(); }
-        }
-    }
-}
-
-impl Transformation<CartesianCoordinate> for TriComplexes {
-    fn rotate(&mut self, trans: Transformer, pivot: CartesianCoordinate) {
-        match self {
-            TriComplexes::RectangularPrism(q) => {
-                q.rotate(trans, pivot)
-            }
-        }
-    }
 }
 

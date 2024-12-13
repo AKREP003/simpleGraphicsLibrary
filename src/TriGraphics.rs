@@ -2,6 +2,7 @@ use crate::camera::Camera;
 use crate::DiComplex::{ComplexTriangle, Quadrangle};
 use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::graphics::{Colour, Compile, DiCoordinate, GraphicObjects, Surface};
+use crate::graphics::GraphicObjects::Triangle;
 use crate::render::Arche;
 use crate::render::Arche::Tri;
 use crate::transitions::{di_to_tri, rotate_coordinate, Transformation, Transformer, tri_to_di};
@@ -23,7 +24,6 @@ fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
 pub struct TriTriangle {
     di: ComplexTriangle,
     coords: [CartesianCoordinate; 3],
-    surface: Surface,
     pub center: CartesianCoordinate,
 
 }
@@ -36,7 +36,6 @@ impl TriTriangle {
         let mut buffer = TriTriangle {
             di,
             coords: *coords,
-            surface,
             center: (0.0, 0.0, 0.0),
         };
 
@@ -61,6 +60,24 @@ impl TriTriangle {
 
         (x, y, z)
     }
+
+    pub fn projection(&mut self, cam: &Camera, focal_length: f64) {
+        // Apply projection to each coordinate
+        for i in 0..3 {
+            let projected = cam.projection(self.coords[i], focal_length);
+
+            self.coords[i] = projected; // Retain original z
+        }
+
+        // Update derived properties
+        self.di = ComplexTriangle::construct(&mut [
+            tri_to_di(self.coords[0]),
+            tri_to_di(self.coords[1]),
+            tri_to_di(self.coords[2]),
+        ], self.di.get_surface());
+
+        self.center = self.get_center();
+    }
 }
 
 impl Compile for TriTriangle {
@@ -78,7 +95,7 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
             tri_to_di(self.coords[0]),
             tri_to_di(self.coords[1]),
             tri_to_di(self.coords[2])
-        ], self.surface.clone());
+        ], self.di.get_surface());
 
         self.center = self.get_center();
     }

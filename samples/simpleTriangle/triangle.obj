@@ -1,0 +1,8 @@
+mtllib Bambo_House.mtl
+v 10.0 10.0 1.0
+v 10.0 0.0 1.0
+v 0.0 0.0 1.0
+vt 0.0 0.0
+usemtl metal_dark
+s off
+f 2 1 3

@@ -6,6 +6,7 @@ extern crate core;
 use std::collections::LinkedList;
 use std::f32::consts::PI;
 use std::intrinsics::{powf64, sqrtf64};
+use std::path::Path;
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -24,6 +25,7 @@ use crate::camera::Camera;
 use crate::DiComplex::ComplexTriangle;
 use crate::graphics::{Compile, Visual};
 use crate::graphics::Surface::Flat;
+use crate::ParseModel::compileOBJ;
 use crate::render::Arche::{Di, Tri, TriC};
 use crate::render::Arche;
 use crate::render::Arche::Null;
@@ -32,7 +34,7 @@ use crate::TriComplex::{Rectprism, TriComplexes};
 use crate::TriComplex::TriComplexes::RectangularPrism;
 use crate::TriGame::{cam, camera_transition};
 use crate::TriGraphics::{TriObjects, TriQuadrangle, TriTriangle};
-use crate::TriGraphics::TriObjects::TriLine;
+use crate::TriGraphics::TriObjects::{TriLine, TriTring};
 
 mod WINdisplay;
 mod render;
@@ -43,6 +45,7 @@ mod TriComplex;
 mod transitions;
 mod camera;
 mod TriGame;
+mod ParseModel;
 
 static mut init: bool = true;
 
@@ -78,11 +81,12 @@ unsafe fn oct() -> Option<State> {
     let mut projection_buffer = Null;
 
 
-    if let Arche::TriC(tri) = &SHAPE {
-        if let TriComplexes::RectangularPrism(prism) = &tri {
+    if let Arche::Tri(tri) = &SHAPE {
+        if let TriObjects::TriTring(mut prism) = &tri {
             piv = prism.center;
-            SHAPE.rotate(r30, piv);
-            projection_buffer = prism.projection(&cam, 350.0).into()
+            //SHAPE.rotate(r30, piv);
+            prism.projection(&cam, 350.0);
+            projection_buffer = prism.into();
         }
     };
 
@@ -105,8 +109,10 @@ fn main() {
         Flat((100, 100, 100, 0)),
     ];
 
+
+
     unsafe {
-        SHAPE = Rectprism::construct((((WIDTH / 2) - 50) as f64, ((HEIGHT / 2) - 50) as f64, 300.0), [100.0, 50.0, 100.0], colors).into();
+        SHAPE = compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
 
         LAST_RUN_TIME = Some(Instant::now());
 

@@ -53,6 +53,10 @@ impl ComplexTriangle {
         return buffer;
     }
 
+    pub fn get_surface(&self) -> Surface {
+        return self.sub_triangles[0].unwrap().surf.clone();
+    }
+
     pub fn get_center(&self) -> DiCoordinate {
         let mut x: f32 = 0.0;
         let mut y: f32 = 0.0;
