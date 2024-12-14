@@ -26,9 +26,9 @@ use crate::DiComplex::ComplexTriangle;
 use crate::graphics::{Compile, Visual};
 use crate::graphics::Surface::Flat;
 use crate::ParseModel::compileOBJ;
-use crate::render::Arche::{Di, Tri, TriC};
-use crate::render::Arche;
-use crate::render::Arche::Null;
+use Arc::Arche::{Di, Tri, TriC};
+use Arc::Arche;
+use Arc::Arche::Null;
 use crate::transitions::{from_angles, Transformer};
 use crate::TriComplex::{Rectprism, TriComplexes};
 use crate::TriComplex::TriComplexes::RectangularPrism;
@@ -46,6 +46,7 @@ mod transitions;
 mod camera;
 mod TriGame;
 mod ParseModel;
+mod Arc;
 
 static mut init: bool = true;
 
@@ -85,6 +86,13 @@ unsafe fn oct() -> Option<State> {
         if let TriObjects::TriTring(mut prism) = &tri {
             piv = prism.center;
             //SHAPE.rotate(r30, piv);
+            prism.projection(&cam, 350.0);
+            projection_buffer = prism.into();
+        }
+
+        if let TriObjects::TriQuad(mut prism) = &tri {
+            piv = prism.center;
+            SHAPE.rotate(r30, piv);
             prism.projection(&cam, 350.0);
             projection_buffer = prism.into();
         }

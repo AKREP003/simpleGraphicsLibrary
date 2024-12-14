@@ -3,8 +3,8 @@ use crate::DiComplex::{ComplexTriangle, Quadrangle};
 use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::graphics::{Colour, Compile, DiCoordinate, GraphicObjects, Surface};
 use crate::graphics::GraphicObjects::Triangle;
-use crate::render::Arche;
-use crate::render::Arche::Tri;
+use crate::Arc::Arche;
+use crate::Arc::Arche::Tri;
 use crate::transitions::{di_to_tri, rotate_coordinate, Transformation, Transformer, tri_to_di};
 use crate::TriGraphics::TriObjects::TriTring;
 
@@ -104,9 +104,9 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
 #[derive(Clone, Copy, Debug)]
 pub struct TriQuadrangle {
     di: Quadrangle,
-    coords: [CartesianCoordinate; 4],
+    pub coords: [CartesianCoordinate; 4],
     surface: Surface,
-    center: CartesianCoordinate,
+    pub center: CartesianCoordinate,
 }
 
 impl TriQuadrangle {

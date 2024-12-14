@@ -4,8 +4,8 @@ use crate::{graphics, transitions};
 use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
 use crate::graphics::{Compile, DiCoordinate, GraphicObjects, GraphicTriangle, Surface};
 use crate::graphics::GraphicObjects::Triangle;
-use crate::render::Arche;
-use crate::render::Arche::Di;
+use crate::Arc::Arche;
+use crate::Arc::Arche::Di;
 use crate::transitions::{di_to_tri, rotate_coordinate, Transformation, Transformer, tri_to_di};
 use crate::TriGraphics::CartesianCoordinate;
 

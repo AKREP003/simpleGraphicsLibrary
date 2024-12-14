@@ -2,9 +2,10 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use crate::DiComplex::Quadrangle;
 use crate::graphics::Surface;
 use crate::graphics::Surface::Flat;
-use crate::render::Arche;
+use crate::Arc::Arche;
 use crate::TriGraphics::{CartesianCoordinate, TriQuadrangle, TriTriangle};
 
 static SIZE_COEFFICIENT: f64 = 100.0;
@@ -56,7 +57,7 @@ pub fn compileOBJ (path : Box<Path>) -> Vec<Arche>{
                 let y = elements[2].parse::<f64>().unwrap();
                 let z = elements[3].parse::<f64>().unwrap();
 
-                vertices.push((x * SIZE_COEFFICIENT, y * SIZE_COEFFICIENT, z * SIZE_COEFFICIENT));
+                vertices.push((x , y , z ));
 
             }
 
@@ -66,16 +67,25 @@ pub fn compileOBJ (path : Box<Path>) -> Vec<Arche>{
 
             "f" => {
 
+                let params : Vec<(usize, Option<usize>)> = elements[1..].iter().map(|x| parse_vert(x)).collect();
+
+                let mut points:Vec<CartesianCoordinate> = params.iter().map(|x| vertices[x.0 - 1]).collect();
 
                 if elements.len() == 4 {
-
-                    let params : Vec<(usize, Option<usize>)> = elements[1..].iter().map(|x| parse_vert(x)).collect();
-
-                    let mut points:Vec<CartesianCoordinate> = params.iter().map(|x| vertices[x.0 - 1]).collect();
 
                     objects.push(
 
                         TriTriangle::construct(&mut [points.remove(0), points.remove(0), points.remove(0)], Flat((100, 200, 0, 255))).into()
+
+                    )
+
+                }
+
+                if elements.len() == 5 {
+
+                    objects.push(
+
+                        TriQuadrangle::construct(&mut [points.remove(0), points.remove(0), points.remove(0), points.remove(0)], Flat((100, 200, 0, 255))).into()
 
                     )
 

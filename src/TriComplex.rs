@@ -1,7 +1,7 @@
 use crate::camera::Camera;
 use crate::graphics::{Compile, GraphicObjects, Surface};
-use crate::render::Arche;
-use crate::render::Arche::TriC;
+use crate::Arc::Arche;
+use crate::Arc::Arche::TriC;
 use crate::transitions::{rotate_coordinate, Transformation, Transformer};
 use crate::TriComplex::TriComplexes::RectangularPrism;
 use crate::TriGraphics::{CartesianCoordinate, TriQuadrangle};

@@ -11,9 +11,10 @@ use winapi::um::libloaderapi::GetModuleHandleA;
 use winapi::um::processthreadsapi::{CreateProcessA, CreateThread, GetCurrentThreadId};
 use winapi::um::wingdi::{BI_RGB, BITMAPINFO, BITMAPINFOHEADER, RGBQUAD, SetDIBitsToDevice};
 use winapi::um::winuser::{AttachThreadInput, CreateWindowExA, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT, DefWindowProcA, DispatchMessageA, GetDC, GetKeyboardState, IDC_ARROW, LoadCursorW, MSG, PostQuitMessage, RegisterClassA, TranslateMessage, WM_DESTROY, WM_PAINT, WNDCLASSA, WS_OVERLAPPEDWINDOW, WS_VISIBLE};
+use crate::Arc::Arche;
 
 use crate::DiComplex::ComplexObjects;
-use crate::render::{Arche, State};
+use crate::render::State;
 use crate::TriGame::camera_transition;
 
 pub const WIDTH: i32 = 900;
