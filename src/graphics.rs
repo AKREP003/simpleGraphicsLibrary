@@ -28,6 +28,7 @@ pub type DiCoordinate = (i32, i32);
 fn indexify(c: &DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
 #[derive(Clone, Debug, Copy)]
+#[repr(C)]
 pub struct GraphicTriangle {
     lines: [InfLine; 2],
 

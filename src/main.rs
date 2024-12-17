@@ -66,7 +66,9 @@ static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to 
 // todo: https://en.wikipedia.org/wiki/3D_projection
 
 
+
 unsafe fn oct() -> Option<State> {
+
     let now = Instant::now();
 
     if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(40) {
@@ -108,6 +110,9 @@ unsafe fn oct() -> Option<State> {
 }
 
 fn main() {
+
+
+
     let colors = [
         Flat((100, 200, 0, 255)),
         Flat((0, 200, 0, 255)),
