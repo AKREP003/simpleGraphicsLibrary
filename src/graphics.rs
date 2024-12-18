@@ -28,13 +28,10 @@ pub type DiCoordinate = (i32, i32);
 fn indexify(c: &DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
 #[derive(Clone, Debug, Copy)]
-#[repr(C)]
 pub struct GraphicTriangle {
     lines: [InfLine; 2],
 
-    pub coords: [DiCoordinate; 3],
-
-    direction: bool,
+    pub coords: [i32; 2],
 
     pub surf: Surface,
 }
@@ -61,7 +58,7 @@ impl GraphicTriangle {
             panic!("use the complex triangle, dont fuck with graphic triangles")
         }
 
-        return GraphicTriangle { lines, coords, direction, surf };
+        return GraphicTriangle { lines, coords : [coords[0].0, coords[2].0], surf };
     }
 
     pub fn into(&self) -> GraphicObjects { Triangle(*self) }
@@ -69,41 +66,26 @@ impl GraphicTriangle {
 
 impl Rend for GraphicTriangle {
     fn rend(&self, rendered: &mut Visual) {
-        if self.direction {
-            for x in 0..self.coords[2].0 - self.coords[0].0 {
-                let r_x = x + self.coords[0].0;
 
-                if r_x < 2 || r_x > WIDTH { continue; }
+        for x in 0..self.coords[1] - self.coords[0] {
 
-                let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
-                let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
+            let r_x = x + self.coords[0];
 
-                for y in min(y1, y2)..max(y1, y2) {
-                    let coord = (r_x, y);
+            if r_x < 2 || r_x > WIDTH { continue; }
 
-                    if y > 1 && y < HEIGHT - 2 {
-                        paint_it(rendered, self.surf, &coord);
-                    }
-                }
-            }
-        } else {
-            for x in 0..self.coords[1].0 - self.coords[0].0 {
-                let r_x = x + self.coords[0].0;
+            let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
+            let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
 
-                if r_x < 2 || r_x > WIDTH { continue; }
+            for y in min(y1, y2)..max(y1, y2) {
+                let coord = (r_x, y);
 
-                let y1 = crossing_point(x, self.lines.get(0).copied()).unwrap();
-                let y2 = crossing_point(x, self.lines.get(1).copied()).unwrap();
+                if y > 1 && y < HEIGHT - 2 {
 
-                for y in min(y1, y2)..max(y1, y2) {
-                    let coord = (r_x, y);
-
-                    if y > 1 && y < HEIGHT - 2 { //further optimization is within the goals
-                        paint_it(rendered, self.surf, &coord);
-                    }
+                    paint_it(rendered, self.surf, &coord);
                 }
             }
         }
+
     }
 }
 
@@ -185,7 +167,7 @@ pub enum Surface {
     Flat(Colour)
 }
 
-type InfLine = (f32, i32);
+pub type InfLine = (f32, i32);
 
 pub fn crossing_point(x: i32, light: Option<InfLine>) -> Option<i32> {
     match light {

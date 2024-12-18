@@ -56,12 +56,6 @@ static degree: f64 = 30.0;
 
 static mut SHAPE: Arche = Null; //ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0))).into();
 
-
-//static mut TRILINE:TriObjects = TriLine((WIDTH / 2 + 100, (HEIGHT / 2) + 100, 1), (WIDTH / 2 - 100, (HEIGHT / 2) - 100, -1), (100, 200, 0, 0));
-//static mut TRITRIANGLE:TriObjects = TriObjects::TriTriangle((WIDTH / 2, HEIGHT / 2, 0), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 100, 0), Flat((100, 200, 0, 0)));
-//static mut TRIQUADRANGLE:TriObjects = TriObjects::TriQuadrangle((WIDTH / 2, HEIGHT / 2, 1), ((WIDTH / 2) + 100, HEIGHT / 2, 1), (WIDTH / 2, (HEIGHT / 2) + 50, 1), (100 + (WIDTH / 2), (HEIGHT / 2) + 50, 1), Flat((100, 200, 0, 0)));
-
-
 static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
 // todo: https://en.wikipedia.org/wiki/3D_projection
 
@@ -72,8 +66,11 @@ unsafe fn oct() -> Option<State> {
     let now = Instant::now();
 
     if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(40) {
+
         return None;
     } else { LAST_RUN_TIME = Some(now); }
+
+
 
     let r30: Transformer = from_angles(5.0, 5.0, 0.0);
 

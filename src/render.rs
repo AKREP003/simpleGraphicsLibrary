@@ -1,9 +1,10 @@
+use std::thread;
 use crate::{HEIGHT, WIDTH};
 use crate::Arc::Arche;
 use crate::Arc::Arche::Tri;
 use crate::DiComplex::{ComplexObjects, ComplexTriangle, Quadrangle};
 use crate::DiComplex::ComplexObjects::Polygon;
-use crate::graphics::{GraphicObjects, GraphicTriangle, Rend, Visual};
+use crate::graphics::{DiCoordinate, GraphicObjects, GraphicTriangle, Rend, Visual};
 use crate::graphics::Compile;
 use crate::graphics::Surface::Flat;
 use crate::transitions::{Transformation, Transformer};
@@ -22,6 +23,15 @@ struct MyStruct {
     x: i32
 }
 
+#[derive(Clone, Debug, Copy)]
+#[repr(C)]
+struct GraphicTriangleC {
+
+
+    pub coords: [i32; 2],
+
+}
+
 pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
     unsafe {
 
@@ -30,29 +40,19 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
             return;
         }
 
-        let mut triangle_buffer: Vec<GraphicTriangle> = vec![];
+        //let mut triangle_buffer: Vec<GraphicTriangle> = vec![];
 
         for object in objects.iter() {
             for graphic in &mut object.compile() {
 
-                match graphic {
-                    GraphicObjects::Pixel(_, _) => {graphic.rend(pixels);}
-                    GraphicObjects::Line(_, _, _) => {graphic.rend(pixels);}
-                    GraphicObjects::Triangle(triangle) => {
-                        triangle_buffer.push(*triangle);
-                    }
-                }
+                graphic.rend(pixels);
 
             };
         }
 
-        let mut vec: Vec<MyStruct> = vec![MyStruct {x:1}, MyStruct {x:2}, MyStruct {x:3}, MyStruct {x:4}, MyStruct {x:5}];
+        //let mut vec: Vec<MyStruct> = vec![MyStruct {x:1}, MyStruct {x:2}, MyStruct {x:3}, MyStruct {x:4}, MyStruct {x:5}];
 
-        iterateOver(
-            vec.as_ptr(),
-            vec.len(),
-            std::mem::size_of::<MyStruct>(),
-        );
+        //iterateOver(vec.as_ptr(), vec.len(), std::mem::size_of::<MyStruct>(), );
     }
 }
 

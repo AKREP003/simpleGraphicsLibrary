@@ -2,7 +2,7 @@ use std::{ptr, thread};
 use std::ffi::CString;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{self, Receiver, Sender};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use winapi::shared::minwindef::{LPARAM, LRESULT, UINT, WPARAM};
 use winapi::shared::ntdef::LPCSTR;
@@ -28,7 +28,13 @@ static mut DRAW_CALLBACK: Option<DrawCallback> = None;
 
 static mut EVENTLOOP: Option<EventLoop> = None;
 
-static mut PIXEL_BUFFER: Vec<u8> = vec![];
+static mut PIXEL_BUFFER: [Vec<u8>;2]= [vec![], vec![]];
+
+static mut PIXEL_POINTER :usize = 0;
+
+static mut PIXEL_LOCK : bool = false;
+
+static mut LAST_DRAW_TIME: Option<Instant> = None;
 
 unsafe extern "system" fn window_proc(
     hwnd: HWND,
@@ -38,6 +44,13 @@ unsafe extern "system" fn window_proc(
 ) -> LRESULT {
     match msg {
         WM_PAINT => {
+            let now = Instant::now();
+            if let Some(last_time) = LAST_DRAW_TIME && now.duration_since(last_time) < Duration::from_millis(60) {
+
+                thread::sleep(Duration::from_millis(60) - now.duration_since(last_time));
+
+            } else { LAST_DRAW_TIME = Some(now); }
+
             let hdc: HDC = GetDC(hwnd);
 
 
@@ -66,7 +79,10 @@ unsafe extern "system" fn window_proc(
                 bmiColors: [rgbq; 1],
             };
 
-            // Draw pixels to the window using SetDIBitsToDevice
+
+            let pointer_buffer = if PIXEL_LOCK { (PIXEL_POINTER as i32 - 1).abs() as usize} else { PIXEL_POINTER  };
+
+
             SetDIBitsToDevice(
                 hdc,
                 0,
@@ -77,7 +93,7 @@ unsafe extern "system" fn window_proc(
                 0,
                 0,
                 HEIGHT as u32,
-                PIXEL_BUFFER.as_ptr() as *const _,
+                PIXEL_BUFFER.get(pointer_buffer ).unwrap().as_ptr() as *const _,
                 &bmi,
                 winapi::um::wingdi::DIB_RGB_COLORS,
             );
@@ -94,15 +110,22 @@ unsafe extern "system" fn window_proc(
 
 unsafe extern "system" fn render_loop(_: *mut winapi::ctypes::c_void) -> u32 {
     while true {
+
+        PIXEL_LOCK = true;
         if let Some(callback) = DRAW_CALLBACK {
             if let Some(s) = EVENTLOOP && let Some(state) = s() {
-                if let Some(v) = state.canvas {
-                    PIXEL_BUFFER = v;
+                if let Some(mut v) = state.canvas {
+                    PIXEL_BUFFER[PIXEL_POINTER] = v;
                 }
 
-                callback(&mut PIXEL_BUFFER, state.objects);
+                callback(&mut PIXEL_BUFFER.get_mut(PIXEL_POINTER).unwrap(), state.objects);
+
+                PIXEL_POINTER = (PIXEL_POINTER as i32 - 1).abs() as usize;
+
             }
+
         }
+        PIXEL_LOCK = false;
     }
 
     return 0;
@@ -125,8 +148,9 @@ pub fn run_window(draw_callback: DrawCallback, event_loop: EventLoop) {
 
         AttachThreadInput(GetCurrentThreadId(), renderId, 1);
 
+        LAST_DRAW_TIME = Some(Instant::now());
 
-        PIXEL_BUFFER = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
+        PIXEL_BUFFER[PIXEL_POINTER] = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
 
         let h_instance = GetModuleHandleA(ptr::null());
         let class_name = CString::new("window").unwrap();
