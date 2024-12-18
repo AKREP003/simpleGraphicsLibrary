@@ -5,6 +5,9 @@
     {
       "AbsoluteMoniker": "D:0:0:{8392F40E-C6AA-4F8A-A947-5E53E243897F}|graphic_parallelism.vcxproj|C:\\Users\\aliek\\Desktop\\projeler\\rusty\\graphs\\graphic_parallelism\\kernel.cu||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{8392F40E-C6AA-4F8A-A947-5E53E243897F}|graphic_parallelism.vcxproj|solutionrelative:kernel.cu||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8392F40E-C6AA-4F8A-A947-5E53E243897F}|graphic_parallelism.vcxproj|C:\\PROGRAM FILES\\NVIDIA GPU COMPUTING TOOLKIT\\CUDA\\V12.6\\INCLUDE\\CRT\\FUNC_MACRO.H||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,11 +17,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "func_macro.h",
+              "DocumentMoniker": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.6\\include\\crt\\func_macro.h",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\..\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.6\\include\\crt\\func_macro.h",
+              "ToolTip": "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.6\\include\\crt\\func_macro.h",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\..\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.6\\include\\crt\\func_macro.h",
+              "ViewState": "AQIAAAkAAAAAAAAAAAArwB0AAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-12-18T14:50:23.028Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -28,7 +44,7 @@
               "RelativeDocumentMoniker": "kernel.cu",
               "ToolTip": "C:\\Users\\aliek\\Desktop\\projeler\\rusty\\graphs\\graphic_parallelism\\kernel.cu",
               "RelativeToolTip": "kernel.cu",
-              "ViewState": "AQIAAAwAAAAAAAAAAAAAAA0AAAAAAAAA",
+              "ViewState": "AQIAAGoAAAAAAAAAAAAYwIQAAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-12-17T17:19:59.791Z",
               "EditorCaption": ""

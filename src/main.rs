@@ -65,7 +65,7 @@ unsafe fn oct() -> Option<State> {
 
     let now = Instant::now();
 
-    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(40) {
+    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(80) {
 
         return None;
     } else { LAST_RUN_TIME = Some(now); }
@@ -91,8 +91,8 @@ unsafe fn oct() -> Option<State> {
 
         if let TriObjects::TriQuad(mut prism) = &tri {
             piv = prism.center;
-            SHAPE.rotate(r30, piv);
-            prism.projection(&cam, 350.0);
+            //SHAPE.rotate(r30, piv);
+            prism.projection(&cam, 600.0);
             projection_buffer = prism.into();
         }
     };

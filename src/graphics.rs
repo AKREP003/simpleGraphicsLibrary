@@ -29,7 +29,7 @@ fn indexify(c: &DiCoordinate) -> usize { ((WIDTH * c.1 + c.0) * 4) as usize }
 
 #[derive(Clone, Debug, Copy)]
 pub struct GraphicTriangle {
-    lines: [InfLine; 2],
+    pub(crate) lines: [InfLine; 2],
 
     pub coords: [i32; 2],
 
@@ -48,12 +48,12 @@ impl GraphicTriangle {
             lines = [
                 line_between_points(coords[0], coords[2]),
                 line_between_points(coords[1], coords[2])
-            ].into_iter().filter_map(|x| x).collect::<Vec<(f32, i32)>>().try_into().expect("eee");
+            ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>().try_into().expect("eee");
         } else if coords[1].0 == coords[2].0 {
             lines = [
                 line_between_points(coords[0], coords[1]),
                 line_between_points(coords[0], coords[2])
-            ].into_iter().filter_map(|x| x).collect::<Vec<(f32, i32)>>().try_into().expect("eee");
+            ].into_iter().filter_map(|x| x).collect::<Vec<InfLine>>().try_into().expect("eee");
         } else {
             panic!("use the complex triangle, dont fuck with graphic triangles")
         }
@@ -167,12 +167,17 @@ pub enum Surface {
     Flat(Colour)
 }
 
-pub type InfLine = (f32, i32);
+#[derive(Clone, Debug, Copy)]
+#[repr(C)]
+pub struct InfLine {
+    pub slope: f32,
+    pub constant: i32,
+}
 
 pub fn crossing_point(x: i32, light: Option<InfLine>) -> Option<i32> {
     match light {
-        Some((slope, intercept)) => unsafe {
-            let y = slope * (x as f32) + (intercept as f32);
+        Some(line) => unsafe {
+            let y = line.slope * (x as f32) + (line.constant as f32);
             Some(floorf32(y) as i32)
         },
         None => None
@@ -187,9 +192,9 @@ pub fn line_between_points(p1: DiCoordinate, p2: DiCoordinate) -> Option<InfLine
 
     let slope = dy as f32 / dx as f32;
 
-    let intercept = p1.1;  //(p1.1 as f32 - (slope * p1.0 as f32)) as i32;
+    let constant = p1.1;  //(p1.1 as f32 - (slope * p1.0 as f32)) as i32;
 
-    Some((slope, intercept))
+    Some(InfLine {slope, constant})
 }
 
 fn alpha_blend(foreground: (u8, u8, u8, u8), background: (u8, u8, u8, u8)) -> (u8, u8, u8, u8) {
