@@ -66,7 +66,7 @@ impl TriTriangle {
         for i in 0..3 {
             let projected = cam.projection(self.coords[i], focal_length);
 
-            self.coords[i] = projected; // Retain original z
+            self.coords[i] = projected;
         }
 
         // Update derived properties

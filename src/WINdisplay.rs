@@ -108,24 +108,39 @@ unsafe extern "system" fn window_proc(
     }
 }
 
+static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
+
+
 unsafe extern "system" fn render_loop(_: *mut winapi::ctypes::c_void) -> u32 {
     while true {
 
-        PIXEL_LOCK = true;
-        if let Some(callback) = DRAW_CALLBACK {
-            if let Some(s) = EVENTLOOP && let Some(state) = s() {
-                if let Some(mut v) = state.canvas {
-                    PIXEL_BUFFER[PIXEL_POINTER] = v;
+        let now = Instant::now();
+
+        if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(120) {
+
+        } else {
+            LAST_RUN_TIME = Some(now);
+
+            PIXEL_LOCK = true;
+            if let Some(callback) = DRAW_CALLBACK {
+                if let Some(s) = EVENTLOOP && let Some(state) = s() {
+                    if let Some(mut v) = state.canvas {
+                        PIXEL_BUFFER[PIXEL_POINTER] = v;
+                    }
+
+                    callback(&mut PIXEL_BUFFER.get_mut(PIXEL_POINTER).unwrap(), state.objects);
+
+                    PIXEL_POINTER = (PIXEL_POINTER as i32 - 1).abs() as usize;
+
                 }
 
-                callback(&mut PIXEL_BUFFER.get_mut(PIXEL_POINTER).unwrap(), state.objects);
-
-                PIXEL_POINTER = (PIXEL_POINTER as i32 - 1).abs() as usize;
-
             }
+            PIXEL_LOCK = false;
 
         }
-        PIXEL_LOCK = false;
+
+
+
     }
 
     return 0;
@@ -149,6 +164,8 @@ pub fn run_window(draw_callback: DrawCallback, event_loop: EventLoop) {
         AttachThreadInput(GetCurrentThreadId(), renderId, 1);
 
         LAST_DRAW_TIME = Some(Instant::now());
+
+        LAST_RUN_TIME = Some(Instant::now());
 
         PIXEL_BUFFER[PIXEL_POINTER] = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
 

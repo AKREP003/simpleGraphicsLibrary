@@ -54,21 +54,14 @@ static degree: f64 = 30.0;
 //todo https://en.wikipedia.org/wiki/Wavefront_.obj_file
 
 
-static mut SHAPE: Arche = Null; //ComplexTriangle::construct(&mut [(WIDTH / 2, HEIGHT / 2), ((WIDTH / 2) + 100, HEIGHT / 2), (WIDTH / 2, (HEIGHT / 2) + 100)], Flat((100, 200, 0, 0))).into();
-
-static mut LAST_RUN_TIME: Option<Instant> = None; // Static mutable variable to store the last run time
+static mut SHAPE: Arche = Null; //
 // todo: https://en.wikipedia.org/wiki/3D_projection
 
 
 
 unsafe fn oct() -> Option<State> {
 
-    let now = Instant::now();
 
-    if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(80) {
-
-        return None;
-    } else { LAST_RUN_TIME = Some(now); }
 
 
 
@@ -83,10 +76,16 @@ unsafe fn oct() -> Option<State> {
 
     if let Arche::Tri(tri) = &SHAPE {
         if let TriObjects::TriTring(mut prism) = &tri {
-            piv = prism.center;
+
             //SHAPE.rotate(r30, piv);
             prism.projection(&cam, 350.0);
-            projection_buffer = prism.into();
+
+            piv = prism.center;
+
+            if piv.2 >= 0.0 {
+                projection_buffer = prism.into();
+            }
+
         }
 
         if let TriObjects::TriQuad(mut prism) = &tri {
@@ -122,9 +121,11 @@ fn main() {
 
 
     unsafe {
-        SHAPE = compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
+        SHAPE = TriTriangle::construct(&mut [(1000.0, 1000.0, 1000.0), (1000.0, 0.0, 1000.0), (0.0, 1000.0, 1000.0)], Flat((100, 200, 0, 0))).into();
 
-        LAST_RUN_TIME = Some(Instant::now());
+        //compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
+
+
 
         run_window(draw_gradient, oct);
     }

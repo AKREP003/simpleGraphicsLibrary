@@ -44,16 +44,22 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
         let mut triangle_buffer: Vec<GraphicTriangleC> = vec![];
 
         for object in objects.iter() {
+
             for graphic in &mut object.compile() {
 
-                if let GraphicObjects::Triangle(graphic) = graphic {
-                    triangle_buffer.push(GraphicTriangleC {lines : graphic.lines, coords: graphic.coords});
+                if let GraphicObjects::Triangle(graph) = graphic {
+
+                    triangle_buffer.push(GraphicTriangleC {lines : graph.lines, coords: graph.coords});
                     continue
                 }
 
-                graphic.rend(pixels);
-
             };
+        }
+
+        if triangle_buffer.len() == 0 {
+            //thread::yield_now();
+
+            return;
         }
 
         let status = drawTriangles(pixels.as_mut_ptr(), WIDTH, HEIGHT, triangle_buffer.as_ptr(), triangle_buffer.len());
