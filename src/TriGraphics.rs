@@ -1,3 +1,4 @@
+use std::ptr::addr_of;
 use crate::camera::Camera;
 use crate::DiComplex::{ComplexTriangle, Quadrangle};
 use crate::DiComplex::ComplexObjects::{CTriangle, Qangle};
@@ -7,6 +8,7 @@ use crate::Arc::Arche;
 use crate::Arc::Arche::Tri;
 use crate::transitions::{di_to_tri, rotate_coordinate, Transformation, Transformer, tri_to_di};
 use crate::TriGraphics::TriObjects::TriTring;
+use crate::TriGame::{cam};
 
 pub type SphericalCoordinate = (f32, f32, f32);
 pub type CartesianCoordinate = (f64, f64, f64);
@@ -61,10 +63,10 @@ impl TriTriangle {
         (x, y, z)
     }
 
-    pub fn projection(&mut self, cam: &Camera, focal_length: f64) {
+    pub unsafe fn projection(&mut self, focal_length: f64) {
         // Apply projection to each coordinate
         for i in 0..3 {
-            let projected = cam.projection(self.coords[i], focal_length);
+            let projected = (*addr_of!(cam)).projection(self.coords[i], focal_length);
 
             self.coords[i] = projected;
         }
@@ -143,10 +145,10 @@ impl TriQuadrangle {
         (x, y, z)
     }
 
-    pub fn projection(&mut self, cam: &Camera, focal_length: f64) {
+    pub unsafe fn projection(&mut self, focal_length: f64) {
         // Apply projection to each coordinate
         for i in 0..4 {
-            let projected = cam.projection(self.coords[i], focal_length);
+            let projected = (*addr_of!(cam)).projection(self.coords[i], focal_length);
 
             self.coords[i] = projected; // Retain original z
         }

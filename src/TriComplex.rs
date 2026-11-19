@@ -160,11 +160,11 @@ impl Rectprism {
         (x, y, z)
     }
 
-    pub fn projection(&self, cam: &Camera, focal_length: f64) -> Self {
+    pub unsafe fn projection(&self, cam: &Camera, focal_length: f64) -> Self {
         let mut buffer = self.clone();
 
         for i in 0..6 {
-            buffer.sides[i].projection(cam, focal_length);
+            buffer.sides[i].projection(focal_length);
         }
 
         buffer

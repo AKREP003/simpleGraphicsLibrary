@@ -1,6 +1,8 @@
 use std::cmp::{max, min};
 use std::f32::consts::PI;
-use std::intrinsics::{ceilf32, floorf32, roundf32};
+
+
+
 use std::process::exit;
 
 use crate::{HEIGHT, WIDTH};
@@ -178,7 +180,7 @@ pub fn crossing_point(x: i32, light: Option<InfLine>) -> Option<i32> {
     match light {
         Some(line) => unsafe {
             let y = line.slope * (x as f32) + (line.constant as f32);
-            Some(floorf32(y) as i32)
+            Some(y.round() as i32)
         },
         None => None
     }

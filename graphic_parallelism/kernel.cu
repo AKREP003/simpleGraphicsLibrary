@@ -57,14 +57,14 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT)
     
         int r_x = x + triangle.coords[0];
 
-        if (r_x < 2 || r_x > WIDTH) { continue; }
+        if (r_x < 2 || r_x > (WIDTH - 2)) { continue; }
 
         int y1 = crossing_point(x, triangle.lines[0]);
         int y2 = crossing_point(x, triangle.lines[1]);
 
         for (int y = min(y1, y2); y < max(y1, y2); y++) {
 
-            if (y > 1 && y < HEIGHT - 2) {
+            if (y > 2 && y < HEIGHT - 2) {
 
                 canvas[(((WIDTH * y) + r_x) * 4) + 0] = 127;
                 canvas[(((WIDTH * y) + r_x) * 4) + 1] = 127;
@@ -78,7 +78,6 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT)
     }
 
 }
-
 
 
 

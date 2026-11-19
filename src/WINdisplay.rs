@@ -1,5 +1,7 @@
+
 use std::{ptr, thread};
 use std::ffi::CString;
+use std::ptr::addr_of;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
@@ -14,6 +16,7 @@ use winapi::um::winuser::{AttachThreadInput, CreateWindowExA, CS_HREDRAW, CS_VRE
 use crate::Arc::Arche;
 
 use crate::DiComplex::ComplexObjects;
+use crate::graphics::Visual;
 use crate::render::State;
 use crate::TriGame::camera_transition;
 
@@ -28,7 +31,7 @@ static mut DRAW_CALLBACK: Option<DrawCallback> = None;
 
 static mut EVENTLOOP: Option<EventLoop> = None;
 
-static mut PIXEL_BUFFER: [Vec<u8>;2]= [vec![], vec![]];
+pub static mut PIXEL_BUFFER: [Vec<u8>;2]= [vec![], vec![]];
 
 static mut PIXEL_POINTER :usize = 0;
 
@@ -43,7 +46,7 @@ unsafe extern "system" fn window_proc(
     l_param: LPARAM,
 ) -> LRESULT {
     match msg {
-        WM_PAINT => {
+        WM_PAINT => unsafe {
             let now = Instant::now();
             if let Some(last_time) = LAST_DRAW_TIME && now.duration_since(last_time) < Duration::from_millis(60) {
 
@@ -83,6 +86,7 @@ unsafe extern "system" fn window_proc(
             let pointer_buffer = if PIXEL_LOCK { (PIXEL_POINTER as i32 - 1).abs() as usize} else { PIXEL_POINTER  };
 
 
+
             SetDIBitsToDevice(
                 hdc,
                 0,
@@ -93,7 +97,7 @@ unsafe extern "system" fn window_proc(
                 0,
                 0,
                 HEIGHT as u32,
-                PIXEL_BUFFER.get(pointer_buffer ).unwrap().as_ptr() as *const _,
+                (*addr_of!(PIXEL_BUFFER)).get(pointer_buffer).unwrap().as_ptr() as *const _,
                 &bmi,
                 winapi::um::wingdi::DIB_RGB_COLORS,
             );
@@ -128,7 +132,11 @@ unsafe extern "system" fn render_loop(_: *mut winapi::ctypes::c_void) -> u32 {
                         PIXEL_BUFFER[PIXEL_POINTER] = v;
                     }
 
-                    callback(&mut PIXEL_BUFFER.get_mut(PIXEL_POINTER).unwrap(), state.objects);
+                    PIXEL_BUFFER[PIXEL_POINTER] = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
+
+                    let buf: &mut Vec<u8> = &mut PIXEL_BUFFER[PIXEL_POINTER];
+
+                    callback(buf, state.objects);
 
                     PIXEL_POINTER = (PIXEL_POINTER as i32 - 1).abs() as usize;
 
@@ -147,7 +155,7 @@ unsafe extern "system" fn render_loop(_: *mut winapi::ctypes::c_void) -> u32 {
 }
 
 
-// Wrapper function to set up and run the window loop
+
 pub fn run_window(draw_callback: DrawCallback, event_loop: EventLoop) {
     unsafe {
         let mut renderId: u32 = 0;
@@ -167,7 +175,9 @@ pub fn run_window(draw_callback: DrawCallback, event_loop: EventLoop) {
 
         LAST_RUN_TIME = Some(Instant::now());
 
-        PIXEL_BUFFER[PIXEL_POINTER] = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
+        PIXEL_BUFFER[0] = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
+
+        PIXEL_BUFFER[1] = vec![0u8; (WIDTH * HEIGHT * 4) as usize];
 
         let h_instance = GetModuleHandleA(ptr::null());
         let class_name = CString::new("window").unwrap();
@@ -206,7 +216,7 @@ pub fn run_window(draw_callback: DrawCallback, event_loop: EventLoop) {
         );
 
 
-        // Run the message loop
+
         let mut msg: MSG = std::mem::zeroed();
         while winapi::um::winuser::PeekMessageA(&mut msg, ptr::null_mut(), 0, 400, 1) > 0 {
             camera_transition();

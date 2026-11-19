@@ -5,7 +5,7 @@ extern crate core;
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
-use std::intrinsics::{powf64, sqrtf64};
+use std::intrinsics::{powf, sqrt};
 use std::path::Path;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -74,11 +74,11 @@ unsafe fn oct() -> Option<State> {
     let mut projection_buffer = Null;
 
 
-    if let Arche::Tri(tri) = &SHAPE {
-        if let TriObjects::TriTring(mut prism) = &tri {
+    if let Arche::Tri(tri) = SHAPE {
+        if let &TriObjects::TriTring(mut prism) = &tri {
 
             //SHAPE.rotate(r30, piv);
-            prism.projection(&cam, 350.0);
+            prism.projection(350.0);
 
             piv = prism.center;
 
@@ -88,10 +88,10 @@ unsafe fn oct() -> Option<State> {
 
         }
 
-        if let TriObjects::TriQuad(mut prism) = &tri {
+        if let &TriObjects::TriQuad(mut prism) = &tri {
             piv = prism.center;
             //SHAPE.rotate(r30, piv);
-            prism.projection(&cam, 600.0);
+            prism.projection( 600.0);
             projection_buffer = prism.into();
         }
     };
@@ -101,7 +101,7 @@ unsafe fn oct() -> Option<State> {
         objects: vec![
             projection_buffer
         ],
-        canvas: Some(vec![0u8; (WIDTH * HEIGHT * 4) as usize]),
+        canvas: None
     })
 }
 
@@ -122,6 +122,7 @@ fn main() {
 
     unsafe {
         SHAPE = TriTriangle::construct(&mut [(1000.0, 1000.0, 1000.0), (1000.0, 0.0, 1000.0), (0.0, 1000.0, 1000.0)], Flat((100, 200, 0, 0))).into();
+
 
         //compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
 
