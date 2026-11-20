@@ -1,7 +1,9 @@
 #![feature(core_intrinsics)]
 #![feature(let_chains)]
+#![allow(static_mut_refs)]
 
 extern crate core;
+
 
 use std::collections::LinkedList;
 use std::f32::consts::PI;
@@ -77,7 +79,8 @@ unsafe fn oct() -> Option<State> {
     if let Arche::Tri(tri) = SHAPE {
         if let &TriObjects::TriTring(mut prism) = &tri {
 
-            //SHAPE.rotate(r30, piv);
+            SHAPE.rotate(r30, piv);
+
             prism.projection(350.0);
 
             piv = prism.center;
@@ -90,8 +93,9 @@ unsafe fn oct() -> Option<State> {
 
         if let &TriObjects::TriQuad(mut prism) = &tri {
             piv = prism.center;
-            //SHAPE.rotate(r30, piv);
+            SHAPE.rotate(r30, piv);
             prism.projection( 600.0);
+            println!("{:?}", prism.surface);
             projection_buffer = prism.into();
         }
     };
@@ -107,26 +111,9 @@ unsafe fn oct() -> Option<State> {
 
 fn main() {
 
-
-
-    let colors = [
-        Flat((100, 200, 0, 255)),
-        Flat((0, 200, 0, 255)),
-        Flat((0, 0, 200, 100)),
-        Flat((0, 100, 200, 255)),
-        Flat((0, 0, 0, 100)),
-        Flat((100, 100, 100, 0)),
-    ];
-
-
-
     unsafe {
-        SHAPE = TriTriangle::construct(&mut [(1000.0, 1000.0, 1000.0), (1000.0, 0.0, 1000.0), (0.0, 1000.0, 1000.0)], Flat((100, 200, 0, 0))).into();
 
-
-        //compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
-
-
+        SHAPE = compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
 
         run_window(draw_gradient, oct);
     }

@@ -107,7 +107,7 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
 pub struct TriQuadrangle {
     di: Quadrangle,
     pub coords: [CartesianCoordinate; 4],
-    surface: Surface,
+    pub surface: Surface,
     pub center: CartesianCoordinate,
 }
 

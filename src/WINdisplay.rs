@@ -23,6 +23,8 @@ use crate::TriGame::camera_transition;
 pub const WIDTH: i32 = 900;
 pub const HEIGHT: i32 = 900;
 
+const DELAY: u64 = 50;
+
 type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Arche>);
 
 type EventLoop = unsafe fn() -> Option<State>;
@@ -120,7 +122,7 @@ unsafe extern "system" fn render_loop(_: *mut winapi::ctypes::c_void) -> u32 {
 
         let now = Instant::now();
 
-        if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(120) {
+        if let Some(last_time) = LAST_RUN_TIME && now.duration_since(last_time) < Duration::from_millis(DELAY) {
 
         } else {
             LAST_RUN_TIME = Some(now);
