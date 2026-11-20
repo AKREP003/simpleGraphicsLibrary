@@ -95,7 +95,7 @@ unsafe fn oct() -> Option<State> {
             piv = prism.center;
             SHAPE.rotate(r30, piv);
             prism.projection( 600.0);
-            println!("{:?}", prism.surface);
+
             projection_buffer = prism.into();
         }
     };

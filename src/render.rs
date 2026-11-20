@@ -32,6 +32,8 @@ struct GraphicTriangleC {
 
     pub coords: [i32; 2],
 
+    pub surface: [u8;4]
+
 }
 
 pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
@@ -50,7 +52,9 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
 
                 if let GraphicObjects::Triangle(graph) = graphic {
 
-                    triangle_buffer.push(GraphicTriangleC {lines : graph.lines, coords: graph.coords});
+                    let color = if let Flat((r,g,b,a)) = graph.surf {[r,g,b,a,]} else { [127,127,127,127] };
+
+                    triangle_buffer.push(GraphicTriangleC {lines : graph.lines, coords: graph.coords, surface:color});
                     continue
                 }
 

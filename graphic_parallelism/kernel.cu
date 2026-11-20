@@ -31,6 +31,8 @@ typedef struct graphicTriangle {
 
     InfLine lines[2];
     int coords[2];
+    uint8_t color[4];
+
 
 } graphicTriangle;
 
@@ -66,10 +68,10 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT)
 
             if (y > 2 && y < HEIGHT - 2) {
 
-                canvas[(((WIDTH * y) + r_x) * 4) + 0] = 127;
-                canvas[(((WIDTH * y) + r_x) * 4) + 1] = 127;
-                canvas[(((WIDTH * y) + r_x) * 4) + 2] = 127;
-                canvas[(((WIDTH * y) + r_x) * 4) + 3] = 127;
+                canvas[(((WIDTH * y) + r_x) * 4) + 0] = triangle.color[2];
+                canvas[(((WIDTH * y) + r_x) * 4) + 1] = triangle.color[1];
+                canvas[(((WIDTH * y) + r_x) * 4) + 2] = triangle.color[0];
+                canvas[(((WIDTH * y) + r_x) * 4) + 3] = 255;
 
             }
 
