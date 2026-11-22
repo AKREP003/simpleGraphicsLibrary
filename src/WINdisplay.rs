@@ -17,7 +17,7 @@ use crate::Arc::Arche;
 
 use crate::DiComplex::ComplexObjects;
 use crate::graphics::Visual;
-use crate::render::State;
+use crate::render::{State, Environment};
 use crate::TriGame::camera_transition;
 
 pub const WIDTH: i32 = 900;
@@ -27,7 +27,7 @@ const DELAY: u64 = 50;
 
 type DrawCallback = fn(&mut Vec<u8>, objects: Vec<Arche>);
 
-type EventLoop = unsafe fn() -> Option<State>;
+type EventLoop = Box<dyn Environment>;
 
 static mut DRAW_CALLBACK: Option<DrawCallback> = None;
 
@@ -129,7 +129,7 @@ unsafe extern "system" fn render_loop(_: *mut winapi::ctypes::c_void) -> u32 {
 
             PIXEL_LOCK = true;
             if let Some(callback) = DRAW_CALLBACK {
-                if let Some(s) = EVENTLOOP && let Some(state) = s() {
+                if let Some(s) = &EVENTLOOP && let Some(state) = s.next_state() {
                     if let Some(mut v) = state.canvas {
                         PIXEL_BUFFER[PIXEL_POINTER] = v;
                     }

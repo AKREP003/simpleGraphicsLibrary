@@ -19,7 +19,7 @@ use winapi::um::winuser::{GetCursorPos, GetKeyboardState};
 use DiComplex::ComplexObjects;
 use DiComplex::ComplexObjects::{CTriangle, Polygon, Qangle};
 use graphics::Rend;
-use render::{draw_gradient, State};
+use render::{draw_gradient, Environment, State};
 use transitions::Transformation;
 use WINdisplay::{HEIGHT, run_window, WIDTH};
 
@@ -37,6 +37,7 @@ use crate::TriComplex::TriComplexes::RectangularPrism;
 use crate::TriGame::{cam, camera_transition};
 use crate::TriGraphics::{TriObjects, TriQuadrangle, TriTriangle};
 use crate::TriGraphics::TriObjects::{TriLine, TriTring};
+use crate::d3Viewer::render_scene;
 
 mod WINdisplay;
 mod render;
@@ -49,6 +50,8 @@ mod camera;
 mod TriGame;
 mod ParseModel;
 mod Arc;
+mod d3Viewer;
+
 
 static mut init: bool = true;
 
@@ -59,54 +62,52 @@ static degree: f64 = 30.0;
 static mut SHAPE: Arche = Null; //
 // todo: https://en.wikipedia.org/wiki/3D_projection
 
+struct singleShape {
 
 
-unsafe fn oct() -> Option<State> {
+}
+
+impl Environment for singleShape {
+    unsafe fn next_state(&self) -> Option<State> {
+        let r30: Transformer = from_angles(5.0, 5.0, 0.0);
+
+        init = false;
+
+        let mut piv = (0.0, 0.0, 0.0);
+
+        let mut projection_buffer = Null;
 
 
+        if let Arche::Tri(tri) = SHAPE {
+            if let &TriObjects::TriTring(mut prism) = &tri {
+                SHAPE.rotate(r30, piv);
 
+                prism.projection(350.0);
 
+                piv = prism.center;
 
-    let r30: Transformer = from_angles(5.0, 5.0, 0.0);
-
-    init = false;
-
-    let mut piv = (0.0, 0.0, 0.0);
-
-    let mut projection_buffer = Null;
-
-
-    if let Arche::Tri(tri) = SHAPE {
-        if let &TriObjects::TriTring(mut prism) = &tri {
-
-            SHAPE.rotate(r30, piv);
-
-            prism.projection(350.0);
-
-            piv = prism.center;
-
-            if piv.2 >= 0.0 {
-                projection_buffer = prism.into();
+                if piv.2 >= 0.0 {
+                    projection_buffer = prism.into();
+                }
             }
 
-        }
+            if let &TriObjects::TriQuad(mut prism) = &tri {
+                piv = prism.center;
+                SHAPE.rotate(r30, piv);
+                prism.projection(600.0);
 
-        if let &TriObjects::TriQuad(mut prism) = &tri {
-            piv = prism.center;
-            SHAPE.rotate(r30, piv);
-            prism.projection( 600.0);
-
-            projection_buffer = prism.into();
-        }
-    };
+                projection_buffer = prism.into();
+            }
+        };
 
 
-    Some(State {
-        objects: vec![
-            projection_buffer
-        ],
-        canvas: None
-    })
+        Some(State {
+            objects: vec![
+                projection_buffer
+            ],
+            canvas: None
+        })
+    }
 }
 
 fn main() {
@@ -115,6 +116,8 @@ fn main() {
 
         SHAPE = compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
 
-        run_window(draw_gradient, oct);
+        render_scene("C:/Users/aliek/Desktop/projeler/rusty/graphs/samples/cube/tinker.obj".to_string());
+
+        run_window(draw_gradient, Box::new(singleShape {}));
     }
 }

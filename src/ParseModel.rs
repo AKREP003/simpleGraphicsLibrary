@@ -17,9 +17,9 @@ fn parse_vert(vert: &str) -> (usize, Option<usize>) {
 
     let split = vert.split("/").collect::<Vec<&str>>();
 
-    let v = split[0].parse::<usize>().unwrap();
+    let v = split[0].replace(&['\t', '\r', '\n'], "").parse::<usize>().unwrap();
 
-    let vt = if split.len() == 2 { Some(split[1].parse::<usize>().unwrap()) } else { None };
+    let vt = if split.len() == 2 { Some(split[1].replace(&['\t', '\r', '\n'], "").parse::<usize>().unwrap()) } else { None };
 
     (v, vt)
 
@@ -70,7 +70,7 @@ fn parseMTL(path : Box<Path>, target: &mut HashMap<String, Surface>){
 
                 let mut surface_color: Colour = (0,0,0,d);
 
-                let color_normal = |i:usize| {(elements[i].parse().unwrap_or(0.0) * 255.0) as u8};
+                let color_normal = |i:usize| {(elements[i].replace(&['\t', '\r', '\n'], "").parse().unwrap_or(0.0) * 255.0) as u8};
 
                 surface_color.0 = color_normal(1);
                 surface_color.1 = color_normal(2);
@@ -162,9 +162,9 @@ pub fn compileOBJ (path : Box<Path>) -> Vec<Arche>{
 
             "v" => {
 
-                let x = elements[1].parse::<f64>().unwrap();
-                let y = elements[2].parse::<f64>().unwrap();
-                let z = elements[3].parse::<f64>().unwrap();
+                let x = elements[1].replace(&['\t', '\r', '\n'], "").parse::<f64>().unwrap();
+                let y = elements[2].replace(&['\t', '\r', '\n'], "").parse::<f64>().unwrap();
+                let z = elements[3].replace(&['\t', '\r', '\n'], "").parse::<f64>().unwrap();
 
                 vertices.push((x , y , z ));
 

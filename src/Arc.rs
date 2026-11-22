@@ -6,6 +6,9 @@ use crate::TriComplex::{Rectprism, TriComplexes};
 use crate::TriGraphics::{CartesianCoordinate, TriObjects, TriQuadrangle, TriTriangle};
 use crate::TriGraphics::TriObjects::TriTring;
 
+
+//todo: there is too much unnecessary abstraction
+//legacy code can't be easily modified
 #[derive(Clone, Copy, Debug)]
 pub enum Arche {
     TriC(TriComplexes),

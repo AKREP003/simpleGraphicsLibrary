@@ -83,3 +83,8 @@ pub struct State {
 
 }
 
+pub trait Environment {
+
+    unsafe fn next_state(&self) -> Option<State>;
+
+}

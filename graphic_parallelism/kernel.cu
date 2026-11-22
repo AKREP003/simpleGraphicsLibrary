@@ -71,7 +71,7 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT)
                 canvas[(((WIDTH * y) + r_x) * 4) + 0] = triangle.color[2];
                 canvas[(((WIDTH * y) + r_x) * 4) + 1] = triangle.color[1];
                 canvas[(((WIDTH * y) + r_x) * 4) + 2] = triangle.color[0];
-                canvas[(((WIDTH * y) + r_x) * 4) + 3] = 255;
+                canvas[(((WIDTH * y) + r_x) * 4) + 3] = triangle.color[3];
 
             }
 
