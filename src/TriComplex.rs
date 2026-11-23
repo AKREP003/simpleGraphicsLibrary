@@ -34,6 +34,23 @@ impl Transformation<CartesianCoordinate> for TriComplexes {
             }
         }
     }
+
+    fn projection(&mut self, focal_length: f64) {
+        unsafe {
+
+            match self {
+                TriComplexes::RectangularPrism(q) => {
+                    q.projection(focal_length);
+                }
+            }
+
+        }
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        return self.get_center();
+    }
+
 }
 
 #[derive(Clone, Debug, Copy)]
@@ -160,7 +177,7 @@ impl Rectprism {
         (x, y, z)
     }
 
-    pub unsafe fn projection(&self, cam: &Camera, focal_length: f64) -> Self {
+    pub unsafe fn projection(&self, focal_length: f64) -> Self {
         let mut buffer = self.clone();
 
         for i in 0..6 {
@@ -197,6 +214,15 @@ impl Transformation<CartesianCoordinate> for Rectprism {
 
         self.center = self.get_center();
     }
+
+    fn projection(&mut self, focal_length: f64) {
+        unsafe {self.projection(focal_length);}
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        return self.get_center();
+    }
+
 }
 
 #[derive(Clone, Debug)]

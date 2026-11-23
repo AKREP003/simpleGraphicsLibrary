@@ -85,6 +85,16 @@ impl Transformation<CartesianCoordinate> for ComplexTriangle {
 
         self.center = self.get_center();
     }
+
+    fn projection(&mut self, focal_length: f64) {
+        unsafe {self.projection(focal_length)}
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        let (x,y) = self.get_center();
+        return (x as f64,y as f64 ,0.0);
+    }
+    
 }
 
 #[derive(Clone, Debug, Copy)]
@@ -151,6 +161,14 @@ impl Transformation<CartesianCoordinate> for Quadrangle {
         self.side.iter_mut().for_each(|x| x.rotate(trans, pivot));
         self.center = self.get_center();
     }
+
+    fn projection(&mut self, focal_length: f64) {
+        unsafe { self.projection(focal_length) }
+    }
+    fn get_center(&self) -> CartesianCoordinate {
+        let (x, y) = self.get_center();
+        return (x as f64, y as f64, 0.0);
+    }
 }
 
 impl Compile for Quadrangle {
@@ -196,6 +214,46 @@ impl Transformation<CartesianCoordinate> for ComplexObjects {
             }
             ComplexObjects::Qangle(t) => {
                 t.rotate(trans, pivot)
+            }
+            ComplexObjects::Polygon(_, _, _, _) => {
+                panic!("don't")
+            }
+
+            ComplexObjects::Null => {
+                panic!("don't")
+            }
+        }
+    }
+
+    fn projection(&mut self, focal_length: f64) {
+
+        match self {
+            CTriangle(t) => unsafe {
+                t.projection(focal_length)
+            }
+            ComplexObjects::Qangle(t) => unsafe{
+                t.projection(focal_length)
+            }
+            ComplexObjects::Polygon(_, _, _, _) => {
+                panic!("don't")
+            }
+
+            ComplexObjects::Null => {
+                panic!("don't")
+            }
+        }
+
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        match self {
+            CTriangle(t) => {
+                let (x,y) = t.get_center();
+                return (x as f64, y as f64, 0.0);
+            }
+            ComplexObjects::Qangle(t) => unsafe{
+                let (x,y) = t.get_center();
+                return (x as f64, y as f64, 0.0);
             }
             ComplexObjects::Polygon(_, _, _, _) => {
                 panic!("don't")

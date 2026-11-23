@@ -64,4 +64,8 @@ pub fn rotate_coordinate(x: CartesianCoordinate, t_matrix: Transformer, pivot: C
 
 pub trait Transformation<Pivot> {
     fn rotate(&mut self, trans: Transformer, pivot: Pivot);
+    fn projection(&mut self, focal_length: f64);
+    fn get_center(&self) -> Pivot;
+
+
 }

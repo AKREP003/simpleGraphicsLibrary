@@ -101,6 +101,14 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
 
         self.center = self.get_center();
     }
+    fn projection(&mut self, focal_length: f64) {
+        unsafe { self.projection(focal_length) };
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        return self.get_center();
+    }
+    
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -184,6 +192,14 @@ impl Transformation<CartesianCoordinate> for TriQuadrangle {
 
         self.center = self.get_center();
     }
+
+    fn projection(&mut self, focal_length: f64) {
+        unsafe { self.projection(focal_length) };
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        return self.get_center();
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -226,6 +242,41 @@ impl Transformation<CartesianCoordinate> for TriObjects {
 
             TriObjects::TriQuad(q) => {
                 q.rotate(trans, pivot)
+            }
+        }
+    }
+
+    fn projection(&mut self, focal_length: f64) {
+        match self {
+            TriObjects::TriLine(x, y, s) => {
+
+            }
+
+            TriObjects::TriTring(t) => unsafe {
+                t.projection(focal_length)
+            }
+
+            TriObjects::TriQuad(q) => unsafe {
+                q.projection(focal_length)
+            }
+            _ => {}
+        }
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        match self {
+            TriObjects::TriLine(x, y, s) => {
+                let (x1, y1, z1) = x;
+                let (x2, y2, z2) = y;
+                (*x1 + *x2 / 2.0, *y1 + *y2 / 2.0, *z1 + *z2 / 2.0)
+            }
+
+            TriObjects::TriTring(t) => {
+                t.get_center()
+            }
+
+            TriObjects::TriQuad(q) => {
+                q.get_center()
             }
         }
     }

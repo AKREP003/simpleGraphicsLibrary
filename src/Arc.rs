@@ -70,4 +70,19 @@ impl Transformation<CartesianCoordinate> for Arche {
             Arche::Null => {}
         }
     }
+
+    fn projection(&mut self, focal_length: f64) {
+
+        match self {
+            Arche::Tri(tri) => tri.projection(focal_length),
+            Arche::Null => {},
+            _ => {}
+        }
+
+    }
+
+    fn get_center(&self) -> CartesianCoordinate {
+        return self.get_center();
+    }
+
 }
