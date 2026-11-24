@@ -17,7 +17,7 @@ pub fn order_objects(objects: &Vec<Arche>) -> Vec<Arche>{
 
     binding.iter_mut().for_each(|mut o| o.project(600.0));
 
-    //binding.retain(|o| vector_magnitude(o.get_cntr()) > 0.0);
+    binding.retain(|o| vector_magnitude(o.get_cntr()) > 0.0);
 
     binding.sort_by(|a, b| vector_magnitude(a.get_cntr()).total_cmp(&vector_magnitude(b.get_cntr())));
 

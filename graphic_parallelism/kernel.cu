@@ -42,14 +42,14 @@ __device__ int crossing_point(int x, InfLine line) {
 
 }
 
-__global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT, int sizeTri)
+__global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT, int sizeTri, int offset)
 {
     
     graphicTriangle* triangles = reinterpret_cast<graphicTriangle*>(data);
 
     int8_t* canvas = reinterpret_cast<int8_t*>(can);
 
-    int i = threadIdx.x;
+    int i = (blockIdx.x * 256) + threadIdx.x + offset;
 
     if (i >= sizeTri) { return; }
 
@@ -70,10 +70,14 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT, int s
 
             if (y > 2 && y < HEIGHT - 2) {
 
-                canvas[(((WIDTH * y) + r_x) * 4) + 0] = triangle.color[2];
-                canvas[(((WIDTH * y) + r_x) * 4) + 1] = triangle.color[1];
-                canvas[(((WIDTH * y) + r_x) * 4) + 2] = triangle.color[0];
-                canvas[(((WIDTH * y) + r_x) * 4) + 3] = triangle.color[3];
+                int index_offset = (((WIDTH * y) + r_x) * 4);
+
+                float d = triangle.color[3] / 255.0;
+
+                canvas[index_offset + 0] = (triangle.color[2] * d) + (canvas[index_offset + 0] * (1 - d));
+                canvas[index_offset + 1] = (triangle.color[1] * d) + (canvas[index_offset + 1] * (1 - d));
+                canvas[index_offset + 2] = (triangle.color[0] * d) + (canvas[index_offset + 2] * (1 - d));
+                canvas[index_offset + 3] = triangle.color[3];
 
             }
 
@@ -85,7 +89,7 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT, int s
 
 
 
-extern "C" cudaError_t DLLEXPORT drawTriangles(int* canvas, int WIDTH, int HEIGHT, const graphicTriangle* data, size_t sizeTri)
+extern "C" cudaError_t DLLEXPORT drawTriangles(int* canvas, int WIDTH, int HEIGHT, const graphicTriangle* data, int sizeTri)
 {
     
     
@@ -132,11 +136,19 @@ extern "C" cudaError_t DLLEXPORT drawTriangles(int* canvas, int WIDTH, int HEIGH
         fprintf(stderr, "cudaMemcpy failed! triangles");
         goto Error;
     }
+    
 
-    int threadsPerBlock = 256;
-    int blocksPerGrid = (sizeTri + threadsPerBlock - 1) / threadsPerBlock;
+    for (int offset = 0; offset < sizeTri; offset += 1024) {
 
-    renderTriangle<<<blocksPerGrid, threadsPerBlock >>>(dev_canvas, dev_tri, WIDTH , HEIGHT, sizeTri);
+        int threadsPerBlock = 256;
+        int blocksPerGrid = ((sizeTri - offset) + threadsPerBlock - 1) / threadsPerBlock;
+        
+        
+        renderTriangle <<<min(blocksPerGrid, 4), threadsPerBlock >>> (dev_canvas, dev_tri, WIDTH, HEIGHT, sizeTri, offset);
+
+    }
+
+    
 
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {

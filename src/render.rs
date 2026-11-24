@@ -66,7 +66,7 @@ pub(crate) fn draw_gradient(pixels: &mut Vec<u8>, objects: Vec<Arche>) {
 
             return;
         }
-
+        //println!("Drawing {} triangles", triangle_buffer.len());
         let status = drawTriangles(pixels.as_mut_ptr(), WIDTH, HEIGHT, triangle_buffer.as_ptr(), triangle_buffer.len());
 
 
