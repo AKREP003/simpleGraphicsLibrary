@@ -66,7 +66,7 @@ fn main() {
 
 
 
-    render_scene("C:/Users/aliek/Desktop/projeler/rusty/graphs/samples/cube/tinker.obj".to_string());
+    render_scene("C:/Users/aliek/Downloads/Exquisite Tumelo/tinker.obj".to_string());
 
 
 

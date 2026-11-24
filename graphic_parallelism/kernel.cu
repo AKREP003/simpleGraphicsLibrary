@@ -42,7 +42,7 @@ __device__ int crossing_point(int x, InfLine line) {
 
 }
 
-__global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT)
+__global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT, int sizeTri)
 {
     
     graphicTriangle* triangles = reinterpret_cast<graphicTriangle*>(data);
@@ -50,6 +50,8 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT)
     int8_t* canvas = reinterpret_cast<int8_t*>(can);
 
     int i = threadIdx.x;
+
+    if (i >= sizeTri) { return; }
 
     graphicTriangle triangle = triangles[i];
 
@@ -131,7 +133,10 @@ extern "C" cudaError_t DLLEXPORT drawTriangles(int* canvas, int WIDTH, int HEIGH
         goto Error;
     }
 
-    renderTriangle<<<1, sizeTri >>>(dev_canvas, dev_tri, WIDTH, HEIGHT);
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (sizeTri + threadsPerBlock - 1) / threadsPerBlock;
+
+    renderTriangle<<<blocksPerGrid, threadsPerBlock >>>(dev_canvas, dev_tri, WIDTH , HEIGHT, sizeTri);
 
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
