@@ -74,10 +74,12 @@ __global__ void renderTriangle(int* can, int *data, int WIDTH, int HEIGHT, int s
 
                 float d = triangle.color[3] / 255.0;
 
+                float d2 = canvas[index_offset + 3] / 255.0;
+
                 canvas[index_offset + 0] = (triangle.color[2] * d) + (canvas[index_offset + 0] * (1 - d));
                 canvas[index_offset + 1] = (triangle.color[1] * d) + (canvas[index_offset + 1] * (1 - d));
                 canvas[index_offset + 2] = (triangle.color[0] * d) + (canvas[index_offset + 2] * (1 - d));
-                canvas[index_offset + 3] = triangle.color[3];
+                canvas[index_offset + 3] = (d + (d2 * (1 - d))) * 255;
 
             }
 
