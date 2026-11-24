@@ -71,18 +71,24 @@ impl Transformation<CartesianCoordinate> for Arche {
         }
     }
 
-    fn projection(&mut self, focal_length: f64) {
+    fn project(&mut self, focal_length: f64) {
 
         match self {
-            Arche::Tri(tri) => tri.projection(focal_length),
+            Arche::Tri(tri) => tri.project(focal_length),
             Arche::Null => {},
             _ => {}
         }
 
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
-        return self.get_center();
+    fn get_cntr(&self) -> CartesianCoordinate {
+        match self {
+            Arche::Tri(tri) => tri.get_cntr(),
+            Arche::Di(di) => di.get_cntr(),
+            Arche::Graphic(gr) => {(0.0,0.0,0.0)}
+            Arche::TriC(tri) => tri.get_cntr(),
+            Arche::Null => {(0.0,0.0,0.0)}
+        }
     }
 
 }

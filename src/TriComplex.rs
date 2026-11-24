@@ -35,7 +35,7 @@ impl Transformation<CartesianCoordinate> for TriComplexes {
         }
     }
 
-    fn projection(&mut self, focal_length: f64) {
+    fn project(&mut self, focal_length: f64) {
         unsafe {
 
             match self {
@@ -47,8 +47,9 @@ impl Transformation<CartesianCoordinate> for TriComplexes {
         }
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
-        return self.get_center();
+    fn get_cntr(&self) -> CartesianCoordinate {
+        //return self.get_center();
+        (0.0,0.0,0.0)
     }
 
 }
@@ -215,11 +216,11 @@ impl Transformation<CartesianCoordinate> for Rectprism {
         self.center = self.get_center();
     }
 
-    fn projection(&mut self, focal_length: f64) {
+    fn project(&mut self, focal_length: f64) {
         unsafe {self.projection(focal_length);}
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
+    fn get_cntr(&self) -> CartesianCoordinate {
         return self.get_center();
     }
 

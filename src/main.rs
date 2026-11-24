@@ -59,65 +59,15 @@ static degree: f64 = 30.0;
 //todo https://en.wikipedia.org/wiki/Wavefront_.obj_file
 
 
-static mut SHAPE: Arche = Null; //
-// todo: https://en.wikipedia.org/wiki/3D_projection
 
-struct singleShape {
-
-
-}
-
-impl Environment for singleShape {
-    unsafe fn next_state(&self) -> Option<State> {
-        let r30: Transformer = from_angles(5.0, 5.0, 0.0);
-
-        init = false;
-
-        let mut piv = (0.0, 0.0, 0.0);
-
-        let mut projection_buffer = Null;
-
-
-        if let Arche::Tri(tri) = SHAPE {
-            if let &TriObjects::TriTring(mut prism) = &tri {
-                SHAPE.rotate(r30, piv);
-
-                prism.projection(350.0);
-
-                piv = prism.center;
-
-                if piv.2 >= 0.0 {
-                    projection_buffer = prism.into();
-                }
-            }
-
-            if let &TriObjects::TriQuad(mut prism) = &tri {
-                piv = prism.center;
-                SHAPE.rotate(r30, piv);
-                prism.projection(600.0);
-
-                projection_buffer = prism.into();
-            }
-        };
-
-
-        Some(State {
-            objects: vec![
-                projection_buffer
-            ],
-            canvas: None
-        })
-    }
-}
 
 fn main() {
 
-    unsafe {
 
-        SHAPE = compileOBJ(Box::from(Path::new("samples/simpleTriangle/triangle.obj"))).get(0).unwrap().clone().into();
 
-        render_scene("C:/Users/aliek/Desktop/projeler/rusty/graphs/samples/cube/tinker.obj".to_string());
 
-        run_window(draw_gradient, Box::new(singleShape {}));
-    }
+    render_scene("C:/Users/aliek/Desktop/projeler/rusty/graphs/samples/cube/tinker.obj".to_string());
+
+
+
 }

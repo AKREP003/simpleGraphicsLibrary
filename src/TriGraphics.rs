@@ -101,11 +101,11 @@ impl Transformation<CartesianCoordinate> for TriTriangle {
 
         self.center = self.get_center();
     }
-    fn projection(&mut self, focal_length: f64) {
+    fn project(&mut self, focal_length: f64) {
         unsafe { self.projection(focal_length) };
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
+    fn get_cntr(&self) -> CartesianCoordinate {
         return self.get_center();
     }
     
@@ -193,11 +193,11 @@ impl Transformation<CartesianCoordinate> for TriQuadrangle {
         self.center = self.get_center();
     }
 
-    fn projection(&mut self, focal_length: f64) {
+    fn project(&mut self, focal_length: f64) {
         unsafe { self.projection(focal_length) };
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
+    fn get_cntr(&self) -> CartesianCoordinate {
         return self.get_center();
     }
 }
@@ -246,7 +246,7 @@ impl Transformation<CartesianCoordinate> for TriObjects {
         }
     }
 
-    fn projection(&mut self, focal_length: f64) {
+    fn project(&mut self, focal_length: f64) {
         match self {
             TriObjects::TriLine(x, y, s) => {
 
@@ -263,7 +263,7 @@ impl Transformation<CartesianCoordinate> for TriObjects {
         }
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
+    fn get_cntr(&self) -> CartesianCoordinate {
         match self {
             TriObjects::TriLine(x, y, s) => {
                 let (x1, y1, z1) = x;

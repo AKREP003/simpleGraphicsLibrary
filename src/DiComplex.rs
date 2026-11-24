@@ -86,11 +86,11 @@ impl Transformation<CartesianCoordinate> for ComplexTriangle {
         self.center = self.get_center();
     }
 
-    fn projection(&mut self, focal_length: f64) {
-        unsafe {self.projection(focal_length)}
+    fn project(&mut self, focal_length: f64) {
+        unsafe {self.project(focal_length)}
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
+    fn get_cntr(&self) -> CartesianCoordinate {
         let (x,y) = self.get_center();
         return (x as f64,y as f64 ,0.0);
     }
@@ -162,10 +162,10 @@ impl Transformation<CartesianCoordinate> for Quadrangle {
         self.center = self.get_center();
     }
 
-    fn projection(&mut self, focal_length: f64) {
-        unsafe { self.projection(focal_length) }
+    fn project(&mut self, focal_length: f64) {
+        unsafe { self.project(focal_length) }
     }
-    fn get_center(&self) -> CartesianCoordinate {
+    fn get_cntr(&self) -> CartesianCoordinate {
         let (x, y) = self.get_center();
         return (x as f64, y as f64, 0.0);
     }
@@ -225,14 +225,14 @@ impl Transformation<CartesianCoordinate> for ComplexObjects {
         }
     }
 
-    fn projection(&mut self, focal_length: f64) {
+    fn project(&mut self, focal_length: f64) {
 
         match self {
             CTriangle(t) => unsafe {
-                t.projection(focal_length)
+                t.project(focal_length)
             }
             ComplexObjects::Qangle(t) => unsafe{
-                t.projection(focal_length)
+                t.project(focal_length)
             }
             ComplexObjects::Polygon(_, _, _, _) => {
                 panic!("don't")
@@ -245,7 +245,7 @@ impl Transformation<CartesianCoordinate> for ComplexObjects {
 
     }
 
-    fn get_center(&self) -> CartesianCoordinate {
+    fn get_cntr(&self) -> CartesianCoordinate {
         match self {
             CTriangle(t) => {
                 let (x,y) = t.get_center();
