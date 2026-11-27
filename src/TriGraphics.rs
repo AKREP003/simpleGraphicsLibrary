@@ -25,7 +25,7 @@ fn spherical_to_cartesian(c: SphericalCoordinate) -> CartesianCoordinate {
 #[derive(Clone, Copy, Debug)]
 pub struct TriTriangle {
     di: ComplexTriangle,
-    coords: [CartesianCoordinate; 3],
+    pub(crate) coords: [CartesianCoordinate; 3],
     pub center: CartesianCoordinate,
 
 }
